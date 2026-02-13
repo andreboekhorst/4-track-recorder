@@ -1,0 +1,90 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #1a1a1a;
+  color: #eee;
+}
+
+.app {
+  text-align: center;
+}
+
+.time {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.track-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  color: #aaa;
+}
+
+.track-select {
+  margin-bottom: 1rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #333;
+  color: #eee;
+  cursor: pointer;
+}
+
+.track-select:hover,
+.track-select:focus {
+  background: #444;
+  outline: none;
+}
+
+.latency {
+  font-size: 0.75rem;
+  color: #888;
+  margin-bottom: 0.5rem;
+  min-height: 1.25rem;
+}
+
+.controls {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #333;
+  color: #eee;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  background: #444;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#record {
+  background: #c00;
+  border-color: #a00;
+}
+
+#record:hover:not(:disabled) {
+  background: #e00;
+}

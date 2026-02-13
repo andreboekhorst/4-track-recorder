@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>4track – Record</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app">
+    <div class="time" id="time">0s</div>
+    <label for="track-select" class="track-label">Track</label>
+    <select id="track-select" class="track-select">
+      <option value="0">Track 1</option>
+      <option value="1">Track 2</option>
+      <option value="2">Track 3</option>
+      <option value="3">Track 4</option>
+    </select>
+    <div id="latency" class="latency" aria-live="polite"></div>
+    <div class="controls">
+      <button type="button" id="record">Record</button>
+      <button type="button" id="stop" disabled>Stop</button>
+      <button type="button" id="play" disabled>Play</button>
+      <button type="button" id="pause" disabled>Pause</button>
+      <button type="button" id="rewind" disabled>Rewind</button>
+    </div>
+    <audio id="audio-1" hidden></audio>
+    <audio id="audio-2" hidden></audio>
+    <audio id="audio-3" hidden></audio>
+    <audio id="audio-4" hidden></audio>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
