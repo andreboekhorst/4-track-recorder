@@ -38,6 +38,8 @@ let recordedChunks = [];
 /** Track index and latency for the current worklet recording (for stop). */
 let recordingTrackIndex = null;
 let recordingLatencySeconds = 0;
+/** Playback position (in seconds) where the current punch-in recording starts. */
+let punchInOffset = 0;
 let timerId = null;
 let playbackTickId = null;
 let seconds = 0;
@@ -203,6 +205,64 @@ function buildBufferFromPCM(ctx, chunks, trimSamples, trackIndex) {
         }
     }
     buffers[trackIndex] = buf;
+    updatePlayButtonState();
+}
+/**
+ * Merge new PCM recording into an existing track buffer at the punch-in point.
+ * Result: [original before punchIn] [new recording] [original after punchIn+newLen]
+ */
+function mergeRecordingIntoBuffer(ctx, chunks, trimSamples, trackIndex, punchInSeconds, latencySeconds) {
+    // 1. Flatten new PCM chunks with latency trim (same logic as buildBufferFromPCM)
+    const totalRawSamples = chunks.reduce((sum, c) => sum + c.length, 0);
+    const newLength = Math.max(0, totalRawSamples - trimSamples);
+    if (newLength === 0)
+        return;
+    const newPCM = new Float32Array(newLength);
+    let writeOffset = 0;
+    let skip = trimSamples;
+    for (const c of chunks) {
+        if (skip > 0) {
+            const take = Math.min(c.length, skip);
+            skip -= take;
+            if (skip === 0 && take < c.length) {
+                newPCM.set(c.subarray(take), writeOffset);
+                writeOffset += c.length - take;
+            }
+        }
+        else {
+            newPCM.set(c, writeOffset);
+            writeOffset += c.length;
+        }
+    }
+    // 2. Determine punch-in sample position in the buffer
+    const existingBuffer = buffers[trackIndex];
+    const existingTrim = trimStart[trackIndex] ?? 0;
+    const punchInSample = Math.max(0, Math.round((punchInSeconds + (existingBuffer ? existingTrim : latencySeconds)) * ctx.sampleRate));
+    // 3. Create result buffer
+    const existingLength = existingBuffer ? existingBuffer.length : 0;
+    const resultLength = Math.max(existingLength, punchInSample + newLength);
+    const resultBuffer = ctx.createBuffer(1, resultLength, ctx.sampleRate);
+    const resultChannel = resultBuffer.getChannelData(0);
+    if (existingBuffer) {
+        const existingData = existingBuffer.getChannelData(0);
+        // Region A: original audio before punch-in
+        const regionAEnd = Math.min(punchInSample, existingLength);
+        if (regionAEnd > 0) {
+            resultChannel.set(existingData.subarray(0, regionAEnd));
+        }
+        // Region B: new recording
+        resultChannel.set(newPCM, punchInSample);
+        // Region C: original audio after new recording
+        const regionCStart = punchInSample + newLength;
+        if (regionCStart < existingLength) {
+            resultChannel.set(existingData.subarray(regionCStart), regionCStart);
+        }
+    }
+    else {
+        // Empty track: silence before punch-in (zero-initialized), then new recording
+        resultChannel.set(newPCM, punchInSample);
+    }
+    buffers[trackIndex] = resultBuffer;
     updatePlayButtonState();
 }
 /** Convert Float32 PCM [-1,1] to the target bit depth for export. */
@@ -386,8 +446,9 @@ function startWebAudioPlayback(offsetSeconds) {
         }
     }, PLAYBACK_TICK_MS);
 }
-/** Play all tracks except excludeIndex at the same time (for monitoring during overdub). */
-function playOtherTracksForMonitoring(excludeIndex) {
+/** Play all tracks except excludeIndex at the same time (for monitoring during overdub).
+ *  offsetSeconds: where in the timeline to start (for punch-in). */
+function playOtherTracksForMonitoring(excludeIndex, offsetSeconds = 0) {
     const ctx = getAudioContext();
     ctx.resume();
     const startTime = ctx.currentTime + 0.02;
@@ -398,10 +459,17 @@ function playOtherTracksForMonitoring(excludeIndex) {
         const buf = buffers[i];
         if (!buf)
             continue;
+        const trim = trimStart[i] ?? 0;
+        const startOffset = offsetSeconds + trim;
+        if (startOffset >= buf.duration)
+            continue;
+        const playDuration = buf.duration - startOffset;
+        if (playDuration <= 0)
+            continue;
         const src = ctx.createBufferSource();
         src.buffer = buf;
         src.connect(gainNodes[i]);
-        src.start(startTime);
+        src.start(startTime, startOffset, playDuration);
         monitoringSources.push(src);
     }
 }
@@ -482,8 +550,9 @@ recordBtn.addEventListener("click", async () => {
         recorderWorkletNode = worklet;
         recordingTrackIndex = selectedTrackIndex;
         recordingLatencySeconds = recordLatencySeconds;
-        setTime(0);
-        playOtherTracksForMonitoring(selectedTrackIndex);
+        punchInOffset = playbackOffset;
+        setTime(Math.floor(punchInOffset));
+        playOtherTracksForMonitoring(selectedTrackIndex, punchInOffset);
         timerId = window.setInterval(() => {
             const next = seconds + 1;
             if (next >= CONFIG.maxSeconds) {
@@ -532,8 +601,11 @@ function stopWorkletRecording() {
     clearTimer();
     const trimSamples = Math.max(0, Math.round((ctx?.sampleRate ?? CONFIG.sampleRate) * recordLatencySeconds));
     if (recordedChunks.length && ctx) {
-        trimStart[selectedTrackIndex] = recordLatencySeconds;
-        buildBufferFromPCM(ctx, recordedChunks, trimSamples, selectedTrackIndex);
+        const hadExistingBuffer = buffers[selectedTrackIndex] !== null;
+        mergeRecordingIntoBuffer(ctx, recordedChunks, trimSamples, selectedTrackIndex, punchInOffset, recordLatencySeconds);
+        if (!hadExistingBuffer) {
+            trimStart[selectedTrackIndex] = recordLatencySeconds;
+        }
         if (latencyEl)
             latencyEl.textContent = `Latency: ~${Math.round(recordLatencySeconds * 1000)} ms (compensated)`;
     }
