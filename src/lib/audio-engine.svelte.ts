@@ -45,9 +45,9 @@ export class Track {
 
 // ─── Pure helpers ─────────────────────────────────────────────────────────────
 
-function makeSaturationCurve(intensity: number, curveBase: number, curveRange: number): Float32Array {
+function makeSaturationCurve(intensity: number, curveBase: number, curveRange: number): Float32Array<ArrayBuffer> {
   const n = 8192;
-  const curve = new Float32Array(n);
+  const curve = new Float32Array(new ArrayBuffer(n * 4));
   const k = curveBase + intensity * curveRange;
   for (let i = 0; i < n; i++) {
     const x = (i / (n - 1)) * 2 - 1;
@@ -380,7 +380,7 @@ export class AudioEngine {
       const src = ctx.createBufferSource();
       src.buffer = buf;
       src.connect(track.gainNode!);
-      src.start(startTime, startOffset, startTime + playDuration);
+      src.start(startTime, startOffset, playDuration);
       this.activePlaybackSources.push(src);
     }
 

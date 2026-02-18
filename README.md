@@ -1,18 +1,29 @@
 # 4track
 
-A browser-based 4-track audio recorder built with the Web Audio API. Designed for low-latency recording with overdub support, latency compensation, and sample-accurate multi-track playback — all running entirely client-side with no server required.
+A browser-based 4-track audio recorder built with the Web Audio API and SvelteKit. Designed for low-latency recording with overdub support, latency compensation, and sample-accurate multi-track playback — all running entirely client-side with no server required.
 
 ## Project Structure
 
 ```
 4track/
-  index.html              - UI shell (buttons, track selector, time display)
-  app.ts                  - Main application logic (TypeScript source)
-  app.js                  - Compiled JavaScript (output of tsc)
-  recorder-worklet.js     - AudioWorklet processor for low-latency PCM capture
-  style.css               - Dark-themed minimal UI styles
-  package.json            - Build script and TypeScript dependency
-  tsconfig.json           - TypeScript compiler configuration
+  src/
+    app.html                        - SvelteKit HTML shell
+    app.d.ts                        - Global type definitions
+    lib/
+      audio-engine.svelte.ts        - Core audio engine (AudioEngine class)
+      types.ts                      - TypeScript interfaces
+      index.ts                      - Library barrel exports
+      assets/
+        favicon.svg
+    routes/
+      +layout.svelte                - Root layout (dark theme, global styles)
+      +page.svelte                  - Main recorder UI (controls, mixer, transport)
+  static/
+    recorder-worklet.js             - AudioWorklet processor for low-latency PCM capture
+  package.json                      - Dependencies and scripts
+  svelte.config.js                  - SvelteKit adapter configuration
+  vite.config.ts                    - Vite build configuration
+  tsconfig.json                     - TypeScript compiler configuration
 ```
 
 ## How It Works
@@ -23,16 +34,17 @@ The app emulates a classic 4-track tape recorder. The user selects a track (1-4)
 
 ### Architecture
 
-The application is split into two files that run in different threads:
+The application is split across three layers:
 
-- **`app.js`** (main thread) — Handles all UI, state management, recording lifecycle, and playback scheduling.
-- **`recorder-worklet.js`** (audio thread) — A lightweight `AudioWorkletProcessor` that captures PCM samples and provides pass-through monitoring.
+- **`src/lib/audio-engine.svelte.ts`** (main thread) — The `AudioEngine` class handles all audio state management, recording lifecycle, playback scheduling, mixing, and save/load. Uses Svelte 5 reactive primitives (`$state`) for UI-bindable properties like `playState`, `position`, `masterVolume`, and per-track `volume`/`pan`/`level`.
+- **`static/recorder-worklet.js`** (audio thread) — A lightweight `AudioWorkletProcessor` that captures PCM samples and provides pass-through monitoring. Runs on a dedicated real-time audio thread, so recording and monitoring are never blocked by UI work.
+- **`src/routes/+page.svelte`** (UI) — The Svelte component that renders transport controls, channel strips, and the mixer. Instantiates `AudioEngine` on mount and binds reactive state to the DOM.
 
-This split is essential: the AudioWorklet runs on a dedicated real-time audio thread, so recording and monitoring are never blocked by UI work on the main thread.
+The `Track` class (inside the audio engine) represents each of the 4 tracks with reactive state (`volume`, `pan`, `level`, `hasContent`) and owns its audio nodes (`GainNode`, `StereoPannerNode`, `AnalyserNode`).
 
 ---
 
-## Detailed JavaScript Walkthrough
+## Detailed Walkthrough
 
 ### 1. AudioContext Setup (`getAudioContext`)
 
@@ -42,7 +54,7 @@ An `AudioContext` is the central object of the Web Audio API. It represents an a
 
 #### Why not use `<audio>` elements or `HTMLMediaElement` instead?
 
-The HTML has four `<audio>` elements in the DOM, but they're **not used for playback** — they exist only as potential fallback hooks. The app uses the Web Audio API exclusively because:
+The app uses the Web Audio API exclusively because:
 
 - **`<audio>` elements cannot synchronise precisely.** Calling `.play()` on multiple elements relies on the main-thread event loop, so tracks drift apart by milliseconds. Web Audio's `source.start(exactTime)` schedules playback on the audio thread at sample-level precision.
 - **No real-time input processing.** `<audio>` elements can only play back files/streams. They can't capture microphone input, apply latency trimming, or build audio buffers from raw PCM. The Web Audio API provides `AudioWorklet`, `MediaStreamSource`, and `AudioBuffer` for all of this.
@@ -93,7 +105,7 @@ The `AudioContext` constructor accepts an `AudioContextOptions` object. Here's w
 - **`sinkId`** (default: `""`, the system default output device) — We don't specify an output device; the system default is fine. This parameter is useful for apps that need to route audio to a specific device (e.g. a USB audio interface), but for a general-purpose recorder the default output is appropriate.
 - **`renderSizeHint`** (non-standard, Chrome-only, default: browser-chosen) — Hints at the preferred render quantum size. The Web Audio spec defines a fixed render quantum of 128 samples, and `"interactive"` already drives the browser toward the smallest possible buffer, so there's no benefit in setting this.
 
-### 2. The Recorder Worklet (`recorder-worklet.js`)
+### 2. The Recorder Worklet (`static/recorder-worklet.js`)
 
 ```js
 class RecorderWorkletProcessor extends AudioWorkletProcessor {
@@ -122,7 +134,7 @@ This worklet does two things per audio frame (~128 samples at 48 kHz):
 
 ### 3. Recording Flow
 
-When the user clicks **Record**, the following happens:
+When the user clicks **Record**, the `AudioEngine.startRecording()` method executes:
 
 #### a. Microphone Access
 
@@ -147,17 +159,6 @@ const AUDIO_CONSTRAINTS = {
 
 #### b. Input Effects Chain & Worklet Setup
 
-```js
-await ctx.audioWorklet.addModule(workletUrl);
-const source = ctx.createMediaStreamSource(stream);
-const worklet = new AudioWorkletNode(ctx, "recorder");
-source.connect(inputGain);
-// → [fx nodes from buildInputFxChain()] →
-prev.connect(recVolNode);
-recVolNode.connect(worklet);
-worklet.connect(ctx.destination);
-```
-
 The full recording signal chain is:
 
 ```
@@ -181,10 +182,6 @@ worklet.port.onmessage = (e) => {
 Each ~128-sample chunk from the worklet is pushed into the `recordedChunks` array. At 48 kHz, a 10-second recording produces roughly 3,750 chunks.
 
 #### d. Overdub Monitoring
-
-```js
-playOtherTracksForMonitoring(selectedTrackIndex);
-```
 
 When recording to track 2 (for example), tracks 1, 3, and 4 are played back simultaneously so the musician can hear the existing material while recording their overdub. All monitoring tracks are scheduled at the same `AudioContext` time for precise sync.
 
@@ -221,20 +218,6 @@ const trimSamples = Math.round(ctx.sampleRate * recordLatencySeconds);
 
 When recording stops, the measured latency is converted to a sample count. That many samples are **trimmed from the start** of the recording. This compensates for the fact that when the user hears the playback cue and plays along, their recorded audio is delayed by the round-trip latency. Trimming the beginning aligns the overdub with the original tracks.
 
-```js
-// Skip the first `trimSamples` samples when building the buffer
-for (const c of chunks) {
-  if (skip > 0) {
-    const take = Math.min(c.length, skip);
-    skip -= take;
-    // ... copy remainder after skip exhausted
-  } else {
-    channel.set(c, offset);
-    offset += c.length;
-  }
-}
-```
-
 The trimming is done sample-by-sample across chunk boundaries, so no audio data is wasted even if a chunk straddles the trim point.
 
 ### 5. Punch-In Merging (`mergeRecordingIntoBuffer`)
@@ -253,7 +236,7 @@ The `punchInOffset` is captured when Record is pressed (from the current `playba
 
 If the new recording extends beyond the original buffer length, the result buffer is expanded. If the track was previously empty, silence fills the gap before the punch-in point.
 
-### 6. Stopping a Recording (`stopWorkletRecording`)
+### 6. Stopping a Recording
 
 When **Stop** is clicked during recording:
 
@@ -263,26 +246,24 @@ When **Stop** is clicked during recording:
 4. Any monitoring playback is stopped.
 5. The recording timer is cleared.
 6. The PCM chunks are assembled into an `AudioBuffer` with latency trimming applied.
-7. UI buttons are re-enabled.
+7. UI buttons are re-enabled via reactive `playState` updates.
 
 The careful ordering of disconnect-before-build ensures no stale PCM data leaks into the next recording session.
 
-### 6. Mixer Channel Strips (`ensureChannelStrips`)
+### 7. Mixer Channel Strips (Track class)
 
-Persistent per-track audio nodes are created once (idempotently) by `ensureChannelStrips()`. Each track gets its own signal chain:
+Each `Track` instance owns a persistent signal chain created when the `AudioEngine` initialises:
 
 ```
 buffer → GainNode (volume) → AnalyserNode (level meter) → StereoPannerNode (L/R) → masterGain → speakers
 ```
 
 - **GainNode** — Per-track volume control (0–1), driven by the Vol slider in each channel strip.
-- **AnalyserNode** — Reads peak audio levels in real-time via `getFloatTimeDomainData()`. The `updateMeters()` function runs on `requestAnimationFrame` and updates the level display in each channel strip.
+- **AnalyserNode** — Reads peak audio levels in real-time via `getFloatTimeDomainData()`. The `updateMeters()` method runs on `requestAnimationFrame` and updates the reactive `level` property on each Track.
 - **StereoPannerNode** — Positions audio in the stereo field (-1 = full left, 0 = center, +1 = full right).
 - **masterGain** — A single global `GainNode` that all four tracks feed into before reaching `ctx.destination`.
 
-All four channel strips and the master gain are created together and persist for the lifetime of the `AudioContext`.
-
-### 7. Playback (`startWebAudioPlayback`)
+### 8. Playback
 
 ```js
 const startTime = ctx.currentTime + 0.02; // 20ms lookahead
@@ -304,46 +285,30 @@ Each `BufferSourceNode` supports an offset parameter, which is used for:
 - **Resume after pause** — if the user paused at 5.3 seconds, playback resumes from exactly 5.3 seconds.
 - **Per-track trim** — each track's latency compensation trim is added to the offset, so the audio plays back correctly aligned.
 
-### 8. Pause & Resume
+### 9. Pause & Resume
 
-**Pause** captures the current playback position:
-
-```js
-playbackOffset = playbackOffset + (ctx.currentTime - playbackStartTime);
-```
-
-Then all source nodes are stopped. **Play** then calls `startWebAudioPlayback(playbackOffset)` to resume from the saved position.
+**Pause** captures the current playback position, then all source nodes are stopped. **Play** then resumes from the saved position.
 
 Note: `AudioBufferSourceNode` is a one-shot — once stopped, it cannot be restarted. New source nodes are created on each play/resume.
 
-### 9. Rewind
+### 10. Reactive State (Svelte 5)
 
-Stops all playback sources, resets `playbackOffset` to 0, and updates the time display. The next Play will start from the beginning.
+The `AudioEngine` and `Track` classes use Svelte 5's `$state()` rune for reactive properties. This means UI updates happen automatically when state changes — no manual DOM manipulation or event dispatching is needed.
 
-### 10. UI State Management (`updatePlayButtonState`)
+Key reactive properties on `AudioEngine`:
+- `playState` — `'stopped' | 'playing' | 'paused' | 'recording'`
+- `position` — Current playback position in seconds
+- `masterVolume`, `trimValue`, `recordingVolume`
+- `latencyInfo` — Measured input/output latency
 
-Button enabled/disabled states are managed centrally:
+Key reactive properties on `Track`:
+- `volume`, `pan` — Mixer controls
+- `level` — Real-time peak meter reading
+- `hasContent` — Whether the track has recorded audio
 
-- **Play** is enabled only when there's recorded content and nothing is currently playing.
-- **Rewind** is enabled when there's content and either playing or not at the start.
-- **Record** is disabled while recording is active.
-- **Stop** is enabled only during recording.
-- **Pause** is enabled only during playback.
+The UI component (`+page.svelte`) reads these properties directly, and Svelte's reactivity system ensures the DOM stays in sync.
 
-### 11. State Variables
-
-| Variable | Purpose |
-|---|---|
-| `buffers[0-3]` | Decoded `AudioBuffer` per track (null if empty) |
-| `trimStart[0-3]` | Latency compensation in seconds per track |
-| `recordedChunks` | PCM `Float32Array` chunks accumulated during current recording |
-| `activePlaybackSources` | Currently playing `BufferSourceNode` instances |
-| `monitoringSources` | Sources playing other tracks during overdub recording |
-| `playbackOffset` | Current playback position in seconds (for pause/resume) |
-| `playbackStartTime` | `AudioContext.currentTime` when playback was last started |
-| `recorderWorkletNode` | Active worklet node (non-null = currently recording) |
-
-### 12. Save / Load (`.4trk` File Format)
+### 11. Save / Load (`.4trk` File Format)
 
 Projects are exported as binary `.4trk` files by `exportProject()` and restored by `importProject()`.
 
@@ -364,37 +329,31 @@ Projects are exported as binary `.4trk` files by `exportProject()` and restored 
 
 ### UI Sections
 
-The HTML in `index.html` is organized into these functional areas:
+The UI in `+page.svelte` is organized into these functional areas:
 
-1. **Time display** (`#time`) — current position in seconds
+1. **Time display** — current position in seconds
 2. **Input config** — track selector, trim slider (LINE/MIC saturation), recording volume
-3. **Transport controls** (`.controls`) — Record, Stop, Play, Pause, Rewind
-4. **Mixer** (`.mixer`) — 4 channel strips, each with volume, pan, and level meter
-5. **Master** (`.master`) — global volume control
-6. **File controls** (`.file-controls`) — Save/Load project buttons
+3. **Transport controls** — Record, Stop, Play, Pause, Rewind
+4. **Mixer** — 4 channel strips, each with volume, pan, and level meter
+5. **Master** — global volume control
+6. **File controls** — Save/Load project buttons
 
 ## Building
 
-The app is written in TypeScript and compiled to JavaScript:
+The app uses SvelteKit with Vite:
 
 ```bash
 npm install
-npm run build    # runs: tsc app.ts --outDir . --target ES2020 --strict
+npm run build      # Production build via Vite + SvelteKit
+npm run preview    # Preview the production build
 ```
 
-The output `app.js` is loaded directly by `index.html` — no bundler is needed.
-
-## Running
-
-Serve the project directory with any static HTTP server (required for AudioWorklet module loading):
+## Developing
 
 ```bash
-npx serve .
-# or
-python3 -m http.server
+npm run dev        # Start Vite dev server with HMR
+npm run check      # Run svelte-check for type errors
 ```
-
-Then open the displayed URL in a browser. Microphone permission will be requested on first record.
 
 ## Browser Compatibility
 
