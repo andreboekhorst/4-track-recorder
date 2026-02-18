@@ -124,6 +124,24 @@ export class AudioEngine {
     return this.getMaxDuration() > 0;
   }
 
+  get duration(): number {
+    return this.getMaxDuration();
+  }
+
+  seek(seconds: number): void {
+    if (this.playState === 'recording') return;
+    const max = this.getMaxDuration();
+    const clamped = Math.max(0, Math.min(seconds, max));
+    this.playbackOffset = clamped;
+    this.position = Math.round(clamped * 10) / 10;
+    if (this.playState === 'playing') {
+      this.stopSources(this.activePlaybackSources);
+      this.clearPlaybackTick();
+      this.stopMeters();
+      this.startPlayback(clamped);
+    }
+  }
+
   play(): void {
     if (this.playState === 'playing' || this.playState === 'recording') return;
     const maxDuration = this.getMaxDuration();
@@ -158,15 +176,19 @@ export class AudioEngine {
 
     this.playbackStartTime = startTime;
     this.playbackOffset = offsetSeconds;
-    this.position = Math.floor(offsetSeconds);
+    this.position = Math.round(offsetSeconds * 10) / 10;
     this.playState = 'playing';
 
     this.startMeters();
     this.playbackTickId = window.setInterval(() => {
       const elapsed = ctx.currentTime - this.playbackStartTime;
-      this.position = Math.floor(this.playbackOffset + elapsed);
+      this.position = Math.round((this.playbackOffset + elapsed) * 10) / 10;
       if (elapsed >= effectiveDuration) {
-        this.rewind();
+        this.playbackOffset = maxDuration;
+        this.position = Math.round(maxDuration * 10) / 10;
+        this.clearPlaybackTick();
+        this.stopMeters();
+        this.playState = 'stopped';
       }
     }, PLAYBACK_TICK_MS);
   }
@@ -183,16 +205,29 @@ export class AudioEngine {
     }
     this.clearPlaybackTick();
     this.stopMeters();
-    this.position = Math.floor(this.playbackOffset);
+    this.position = Math.round(this.playbackOffset * 10) / 10;
     this.playState = 'paused';
   }
 
   stop(): void {
     if (this.recorderWorkletNode) {
       this.stopRecording();
-    } else {
-      this.rewind();
+      return;
     }
+    if (this.playState === 'playing') {
+      const ctx = this.audioContext;
+      if (ctx && this.activePlaybackSources.length > 0) {
+        this.playbackOffset = Math.min(
+          this.playbackOffset + (ctx.currentTime - this.playbackStartTime),
+          this.getMaxDuration(),
+        );
+        this.stopSources(this.activePlaybackSources);
+      }
+      this.clearPlaybackTick();
+      this.stopMeters();
+      this.position = Math.round(this.playbackOffset * 10) / 10;
+    }
+    this.playState = 'stopped';
   }
 
   rewind(): void {
@@ -326,7 +361,7 @@ export class AudioEngine {
     this.recordingLatencySeconds = recordLatencySeconds;
     this.punchInOffset = this.playbackOffset;
 
-    this.position = Math.floor(this.punchInOffset);
+    this.position = Math.round(this.punchInOffset * 10) / 10;
     this.playState = 'recording';
 
     this.playOtherTracksForMonitoring(trackIndex, this.punchInOffset);

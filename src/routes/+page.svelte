@@ -62,6 +62,16 @@
 {#if engine}
 	<div class="app">
 		<div class="time">{engine.position}s</div>
+		<input
+			type="range"
+			class="time-slider"
+			min="0"
+			max={engine.duration || 180}
+			step="0.1"
+			value={engine.position}
+			oninput={(e) => engine?.seek(Number(e.currentTarget.value))}
+			disabled={engine.playState === 'recording' || !engine.hasContent}
+		/>
 
 		<label class="track-label" for="track-select">Track</label>
 		<select id="track-select" class="track-select" bind:value={selectedTrack}>
@@ -190,8 +200,15 @@
 
 	.time {
 		font-size: 2rem;
-		margin-bottom: 1rem;
+		margin-bottom: 0.25rem;
 		font-variant-numeric: tabular-nums;
+	}
+
+	.time-slider {
+		display: block;
+		width: 80%;
+		margin: 0 auto 1rem;
+		accent-color: #f90;
 	}
 
 	.track-label {

@@ -38,6 +38,7 @@ export function exportProject(
   }
 
   const metadata: ProjectMetadata = {
+    filetypeVersion: 1,
     sampleRate: config.sampleRate,
     bitDepth: config.bitDepth,
     masterVolume,

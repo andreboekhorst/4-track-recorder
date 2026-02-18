@@ -25,6 +25,7 @@ export interface TrackMeta {
 }
 
 export interface ProjectMetadata {
+  filetypeVersion?: number;
   sampleRate: number;
   bitDepth: number;
   masterVolume: number;
