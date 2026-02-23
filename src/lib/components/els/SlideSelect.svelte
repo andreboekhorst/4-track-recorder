@@ -14,7 +14,7 @@
     { lbl: "4", val: "3" },
     // { lbl: "SAFE", val: "0" },
   ]
-  let btnHeight = $state(0.2)
+  let btnHeight = $state(0.33)
 
   let { value = $bindable() } = $props()
 
@@ -59,8 +59,9 @@
 >
   <div
     class="thumb"
+    class:dragging
     onpointerdown={start}
-    style="top: {xpos_percentage}%"
+    style="top: {xpos_percentage}%;  height: {btnHeight * 100}%"
   ></div>
 </div>
 
@@ -77,13 +78,15 @@
 
   .thumb {
     width: 20px;
-    height: 20%;
-    background: rgb(221, 221, 221);
+    background: rgb(98, 98, 98);
     /* border-radius: 50%; */
     position: absolute;
     top: 0%;
     left: 5px;
     transform: translate(-50%, 0);
-    cursor: pointer;
+    cursor: grab;
+  }
+  .thumb.dragging {
+    cursor: grabbing;
   }
 </style>
