@@ -22,4 +22,11 @@
     padding: 60px;
     background-color: #ababab;
   }
+
+  :global(.ui-label) {
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: uppercase;
+    /* letter-spacing: 0.1vw; */
+    font-size: 0.8vw;
+  }
 </style>

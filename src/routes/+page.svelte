@@ -48,13 +48,15 @@
 {#if engine}
   <div class="frame">
     <div class="app">
-      <div class="section"><Mixer {engine} /></div>
+      <div class="section mixers"><Mixer {engine} /></div>
       <div class="divider">&nbsp;</div>
       <div class="section input">
         <InputControls {engine} bind:selectedTrack />
       </div>
       <div class="divider">&nbsp;</div>
-      <div class="section"><Transport {engine} {selectedTrack} /></div>
+      <div class="section transport">
+        <Transport {engine} {selectedTrack} />
+      </div>
     </div>
   </div>
 
@@ -73,16 +75,22 @@
 
 <style>
   .frame {
+    container-type: size; /* Container Query */
     background: linear-gradient(to bottom, #616161, #3b3b3b);
     padding: 4px;
     border-radius: 20px 20px 40px 40px;
+    aspect-ratio: 1 / 0.6;
+    max-height: 80vh;
+    max-width: 85vw;
+    margin: 0 auto;
   }
   .app {
-    background: linear-gradient(to bottom, #898989, #464646);
+    background: linear-gradient(to bottom, #313131, #464646);
     border-radius: 20px 20px 36px 36px;
     display: flex;
+    height: 100cqh;
 
-    &:before {
+    /* &:before {
       content: " ";
       display: block;
       width: 100%;
@@ -90,16 +98,23 @@
       background: rgba(255, 255, 255, 0.5);
       filter: blur(4px);
       position: absolute;
-    }
+    } */
   }
 
   .section {
     flex-direction: column;
-    flex: 1;
-    padding: 40px;
+    /* padding: 40px; */
+
+    &.mixers {
+      flex: 0.31;
+    }
 
     &.input {
-      flex: 0.1;
+      flex: 0.225;
+    }
+
+    &.transport {
+      flex: 0.465;
     }
   }
 

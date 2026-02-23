@@ -9,6 +9,7 @@
   }: { engine: AudioEngine; selectedTrack: number } = $props()
 </script>
 
+<div class="line-in">x</div>
 <div class="trim-knob">
   <Knob
     min={-1}
@@ -57,6 +58,9 @@
 <div class="latency">{engine.latencyInfo}</div> -->
 
 <style>
+  .line-in {
+    height: 22cqh;
+  }
   .track-label {
     display: block;
     margin-bottom: 0.25rem;
@@ -88,7 +92,7 @@
     gap: 0.4rem;
     margin-bottom: 1rem;
     font-size: 0.75rem;
-    color: #4e4e4e;
+    color: #aaa;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;

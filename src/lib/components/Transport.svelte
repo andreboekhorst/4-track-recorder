@@ -98,7 +98,7 @@
 </script>
 
 <div class="transport">
-  <div>
+  <div class="top">
     <Timestamp timestamp={engine.position} />
   </div>
   <div>
@@ -121,6 +121,10 @@
 </div>
 
 <style>
+  .top {
+    height: 22cqh;
+  }
+
   .transport {
     display: flex;
     flex-direction: column;
@@ -130,6 +134,7 @@
       flex: 1;
     }
   }
+
   .time {
     font-size: 2rem;
     margin-bottom: 0.25rem;
