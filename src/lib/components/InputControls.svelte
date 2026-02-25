@@ -19,6 +19,7 @@
       onchange={(trim) => engine.setTrim(trim)}
       labelLeft="LINE"
       labelRight="MIC"
+      color="red"
     />
   </div>
   <div class="row sliders">

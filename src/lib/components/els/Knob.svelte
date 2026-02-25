@@ -15,6 +15,7 @@
     onchange,
     labelLeft,
     labelRight,
+    color,
   } = $props()
 
   const startRotate = (e) => {
@@ -66,7 +67,7 @@
   }
 </script>
 
-<div class="knobx">
+<div class="knobx {color}">
   <div
     class="knobcontainer"
     bind:this={containerEl}
@@ -206,7 +207,7 @@
 
       .line1 {
         position: absolute;
-        background-color: #f5c68b;
+        background-color: #ededed;
         width: 4px;
         height: 10px;
         left: calc(50% - 2px);
@@ -214,7 +215,7 @@
       }
       .line2 {
         position: absolute;
-        background-color: #f5c68b;
+        background-color: #ededed;
         width: 4px;
         height: 4px;
         left: calc(50% - 2px);
@@ -237,5 +238,20 @@
       flex: 1;
       text-align: center;
     }
+  }
+
+  .green .line1,
+  .green .line2 {
+    background-color: #60ac8f !important;
+  }
+
+  .pink .line1,
+  .pink .line2 {
+    background-color: #f5c68b !important;
+  }
+
+  .red .line1,
+  .red .line2 {
+    background-color: #b04a4a !important;
   }
 </style>

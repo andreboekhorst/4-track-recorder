@@ -14,6 +14,7 @@
       max={1.5}
       value={engine.masterVolume}
       onchange={(vol) => engine.setMasterVolume(vol)}
+      color="green"
     />
   </div>
 </div>
@@ -43,6 +44,7 @@
           onchange={(pan) => engine.setTrackPan(i, pan)}
           labelLeft="L"
           labelRight="R"
+          color="pink"
         />
       </div>
     </div>
