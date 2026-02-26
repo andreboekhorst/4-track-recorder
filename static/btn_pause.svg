@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 31 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <defs>
+        <filter id="bevel">
+            <feOffset in="SourceAlpha" dx="2.5" dy="2.5" result="a"/>
+            <feComposite in="SourceAlpha" in2="a" operator="out" result="b"/>
+            <feFlood flood-color="#000" flood-opacity="0.8"/>
+            <feComposite in2="b" operator="in" result="s"/>
+            <feOffset in="SourceAlpha" dx="-2" dy="-2" result="c"/>
+            <feComposite in="SourceAlpha" in2="c" operator="out" result="d"/>
+            <feFlood flood-color="#fff" flood-opacity="0.4"/>
+            <feComposite in2="d" operator="in" result="h"/>
+            <feComposite in="s" in2="SourceGraphic" operator="over" result="r"/>
+            <feComposite in="h" in2="r" operator="over"/>
+        </filter>
+    </defs>
+    <g filter="url(#bevel)" transform="matrix(1,0,0,1,-7502.694122,-6966.11235)">
+        <g transform="matrix(0.713692,0,0,0.713692,4998.031255,3628.341326)">
+            <g transform="matrix(0.409091,0,0,1,2243.717876,-8.233124)">
+                <rect x="3094" y="4685" width="44" height="44" fill="#808080"/>
+            </g>
+        </g>
+        <g transform="matrix(0.713692,0,0,0.713692,4998.031255,3628.341326)">
+            <g transform="matrix(0.409091,0,0,1,2268.500379,-8.233124)">
+                <rect x="3094" y="4685" width="44" height="44" fill="#808080"/>
+            </g>
+        </g>
+    </g>
+</svg>

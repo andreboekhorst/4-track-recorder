@@ -132,11 +132,6 @@
       disabled={engine.playState === "recording" || !engine.hasContent}
     />
   </div>
-  <!-- <div class="controls">
-    {#each Object.entries(btns) as [type, btn]}
-      <Button {type} pressed={btn.pressed} onClick={() => clicky(type)} />
-    {/each}
-  </div> -->
 
   <div class="btnLabels">
     {#each Object.entries(btns) as [type, btn]}
@@ -146,14 +141,12 @@
   <div class="controlBtns">
     <div class="imgBtns">
       {#each Object.entries(btns) as [type, btn]}
-        <!-- <Button {type} pressed={btn.pressed} onClick={() => clicky(type)} /> -->
         <button
           type="button"
-          class="btn"
+          class="btn {type}"
           class:active={btn.pressed}
           onmousedown={() => clicky(type)}
         >
-          &nbsp;
         </button>
       {/each}
     </div>
@@ -175,6 +168,7 @@
     flex-direction: column;
     padding-top: 1px;
     padding-right: 2px;
+    perspective: 800px;
   }
   .imgBtns {
     padding: 3px;
@@ -203,6 +197,38 @@
     height: 87px;
     margin-right: 2px;
     box-shadow: 15px 15px 22px rgba(0, 0, 0, 0.6);
+    position: relative;
+
+    &:before {
+      display: block;
+      content: " ";
+      position: absolute;
+      top: 16px;
+      width: 100%;
+      height: 15px;
+      background-size: contain;
+      background-position: center;
+      mix-blend-mode: overlay;
+      background-repeat: no-repeat;
+    }
+    &.rec:before {
+      background-image: url("/btn_rec.svg");
+    }
+    &.play:before {
+      background-image: url("/btn_play.svg");
+    }
+    &.pause:before {
+      background-image: url("/btn_pause.svg");
+    }
+    &.rew:before {
+      background-image: url("/btn_rew.svg");
+    }
+    &.fwd:before {
+      background-image: url("/btn_fwd.svg");
+    }
+    &.stop:before {
+      background-image: url("/btn_stop.svg");
+    }
   }
   .btn.active,
   .btn:active {
@@ -210,6 +236,11 @@
     box-shadow:
       inset 5px 0px 15px rgba(0, 0, 0, 0.4),
       10px 10px 20px rgba(0, 0, 0, 0.6);
+
+    &:before {
+      top: 28px;
+      transform: rotateX(25deg);
+    }
   }
   .btn.active + .btn.active {
     box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.6);
