@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { AudioEngine } from "$lib"
   import Knob from "./els/Knob.svelte"
+  import Lights from "./els/Lights.svelte"
   let { engine }: { engine: AudioEngine } = $props()
 
   let mVolume = $state(0)
@@ -23,10 +24,7 @@
   {#if !track.hidden}
     <div class="row channel-strip">
       <div class="col1 channel-lights">
-        <div class="bg">
-          <div class="light high" class:active={track.level > 3}>&nbsp;</div>
-          <div class="light low" class:active={track.level > 0.5}>&nbsp;</div>
-        </div>
+        <Lights level={track.level} />
       </div>
       <div class="col2 channel-knob">
         <Knob

@@ -19,32 +19,47 @@
   })
 
   let isPaused = $state(false)
-  let btnActive = $state(false)
-  let btnActive1 = $state(false)
+  let speed = $state(0)
 
-  let timer: ReturnType<typeof setInterval> | undefined
-
-  onDestroy(() => {
-    clearInterval(timer)
-  })
-
-  function shuttle(on: boolean, speed: number = 1) {
-    if (on) {
-      clearInterval(timer)
+  $effect(() => {
+    let timer: ReturnType<typeof setInterval> | undefined
+    if (speed != 0) {
       timer = setInterval(() => {
         var newpos = Math.max(0, engine.position + speed / 50)
         newpos = Math.min(newpos, engine.duration)
         engine.seek(newpos)
-      }, 10) //Update every 10ms instead of each ms
-    } else {
-      clearInterval(timer)
-      engine.stop()
+      }, 10)
     }
-  }
+
+    return () => {
+      // cleanup: runs before re-run AND on destroy
+      clearInterval(timer)
+    }
+  })
+
+  // onDestroy(() => {
+  //   clearInterval(timer)
+  // })
+
+  // function shuttle(on: boolean, speed: number = 1) {
+  //   if (on) {
+  //     clearInterval(timer)
+  //     timer = setInterval(() => {
+  //       var newpos = Math.max(0, engine.position + speed / 50)
+  //       newpos = Math.min(newpos, engine.duration)
+  //       engine.seek(newpos)
+  //     }, 10) //Update every 10ms instead of each ms
+  //   } else {
+  //     clearInterval(timer)
+  //     engine.stop()
+  //   }
+  // }
 
   function reset() {
     // Stop Rew/Fwd
-    shuttle(false)
+    // shuttle(false)
+    engine.stop()
+    speed = 0
 
     Object.entries(btns).forEach(([type, btn]) => {
       if (type == "pause") return // Pause has a mind of it's own
@@ -88,12 +103,14 @@
       case "rew":
         reset()
         btns.rew.pressed = true
-        shuttle(true, -4)
+        // shuttle(true, -4)
+        speed = -4
         break
       case "fwd":
         reset()
         btns.fwd.pressed = true
-        shuttle(true, 4)
+        // shuttle(true, 4)
+        speed = 4
         break
     }
   }
