@@ -23,6 +23,12 @@
     background-color: #ababab;
   }
 
+  :global(.cell-center) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   :global(.ui-label) {
     color: rgba(255, 255, 255, 0.6);
     text-transform: uppercase;

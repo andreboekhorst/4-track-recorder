@@ -106,9 +106,11 @@
     align-items: center;
     flex-direction: column;
     user-select: none;
+    container-type: inline-size;
+    width: 7cqw;
   }
   .knobcontainer {
-    width: 5.75cqw;
+    width: 90cqw;
     aspect-ratio: 1 / 1;
     display: flex;
     user-select: none;
@@ -116,7 +118,7 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    margin-bottom: -0.5cqw;
+    margin-bottom: -5cqw;
 
     &:before {
       content: " ";
@@ -150,13 +152,11 @@
     }
   }
   .knob {
-    width: 4.2cqw;
+    width: 66cqw;
     aspect-ratio: 1 / 1;
     border-radius: 100%;
     background-color: rgb(32, 32, 32);
-    /* rotate: 0.4turn; */
     cursor: grab;
-    /* outline: 0.25cqw solid rgb(32, 32, 32); */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -179,14 +179,12 @@
       width: 85%;
       height: 85%;
       border-radius: 100%;
-      /* background: linear-gradient(to bottom right, #bfbfbf, #4a4a4a); */
       background: linear-gradient(to bottom right, #8e8e8e 35%, #4a4a4a 65%);
       display: flex;
       justify-content: center;
       align-items: center;
 
-      box-shadow: 20px 15px 16px rgba(0, 0, 0, 0.4);
-      /* 20px 15px 16px rgba(0, 0, 0, 0.3); */
+      box-shadow: 30cqw 23cqw 25cqw rgba(0, 0, 0, 0.4);
     }
 
     .layer3 {
@@ -196,8 +194,8 @@
       height: 80%;
       background-color: #979797;
       box-shadow:
-        inset 2px 2px 2px rgba(255, 255, 255, 0.5),
-        inset -1px -1px 2px rgba(50, 50, 50, 0.7);
+        inset 3cqw 3cqw 3cqw rgba(255, 255, 255, 0.5),
+        inset -1.5cqw -1.5cqw 3cqw rgba(50, 50, 50, 0.7);
     }
     .layer4 {
       position: relative;
@@ -208,23 +206,22 @@
       .line1 {
         position: absolute;
         background-color: #ededed;
-        width: 4px;
-        height: 10px;
-        left: calc(50% - 2px);
-        border-radius: 3px;
+        width: 6cqw;
+        height: 15cqw;
+        left: calc(50% - 3cqw);
+        border-radius: 5cqw;
       }
       .line2 {
         position: absolute;
         background-color: #ededed;
-        width: 4px;
-        height: 4px;
-        left: calc(50% - 2px);
-        top: -8px;
-        border-radius: 1px;
+        width: 6cqw;
+        height: 6cqw;
+        left: calc(50% - 3cqw);
+        top: -12cqw;
+        border-radius: 1.5cqw;
       }
     }
     .layer5 {
-      /* mix-blend-mode: screen; */
     }
   }
   .knob.dragging {

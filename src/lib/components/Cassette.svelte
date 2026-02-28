@@ -40,45 +40,93 @@
 </script>
 
 <div class="casette">
-  <div class="casette_1">
-    <!-- svelte-ignore a11y_no_static_element_interactions -->
-    <div
-      class="casette_2"
-      onpointerdown={startDrag}
-      onpointermove={drag}
-      onpointerup={stopDrag}
-      onpointerleave={stopDrag}
-      bind:this={containerEl}
-    >
-      <div class="inset">
-        <div class="shadow"></div>
-        <div class="rotaters">
-          <div
-            class="rotater rot1"
-            style:transform={"rotate(" + (time * 270) / 10 + "deg)"}
-          ></div>
-          <div
-            class="rotater rot2"
-            style:transform={"rotate(" + (time * 180) / 10 + "deg)"}
-          ></div>
-        </div>
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div
+    class="window"
+    onpointerdown={startDrag}
+    onpointermove={drag}
+    onpointerup={stopDrag}
+    onpointerleave={stopDrag}
+    bind:this={containerEl}
+  >
+    <div class="window_inset">
+      <div class="shadow"></div>
+      <div class="rotaters">
+        <div
+          class="rotater rot1"
+          style:transform={"rotate(" + (time * 270) / 10 + "deg)"}
+        ></div>
+        <div
+          class="rotater rot2"
+          style:transform={"rotate(" + (time * 180) / 10 + "deg)"}
+        ></div>
       </div>
     </div>
   </div>
 </div>
 
 <style>
-  .casette_2 {
+  .casette {
+    height: 100%;
+    container-type: inline-size;
+    border: 0.75cqw solid #1c1c1f;
+    border-radius: 1cqw;
+    box-shadow: inset 0.25cqw 0.25cqw 0 0 rgb(136 132 132);
+  }
+
+  .window {
     background-color: #212124;
-    border-radius: 4px;
+    border-radius: 1cqw;
     width: 85%;
-    margin: 100px auto;
-    padding: 10px 0;
+    margin: 25cqw auto;
+    padding: 2.5cqw 0;
     position: relative;
     cursor: ew-resize;
 
     &:active {
       cursor: col-resize;
+    }
+
+    .window_inset {
+      background: url("/tape.jpg");
+      background-size: 125%;
+      background-position: -10cqw -28.75cqw;
+      border-radius: 2.5cqw;
+      width: 100%;
+      aspect-ratio: 5.7 / 1;
+      position: relative;
+      margin: 0 auto;
+    }
+
+    .shadow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      box-shadow:
+        inset 0.25cqw 0.25cqw 0 0 rgb(0 0 0),
+        inset 10cqw 5cqw 5cqw rgb(0 0 0 / 95%),
+        inset -1.25cqw -2.5cqw 2.5cqw rgb(0 0 0 / 25%),
+        inset -0.25cqw -0.25cqw 0.25cqw 0 rgba(255, 255, 255, 0.25);
+      border: 0.25cqw solid #171718;
+      z-index: 1;
+      border-radius: 1.25cqw;
+    }
+
+    .rotaters {
+      display: flex;
+      gap: 20cqw;
+      overflow: hidden;
+      height: 15cqw;
+      justify-content: center;
+    }
+
+    .rotater {
+      width: 20cqw;
+      height: 20cqw;
+      background: url("/rotator.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      margin-top: -2.5cqw;
     }
 
     &:before {
@@ -93,76 +141,7 @@
       z-index: 100;
       opacity: 0.1;
       mix-blend-mode: screen;
-      border-radius: 5px;
+      border-radius: 1.25cqw;
     }
   }
-
-  .casette {
-    height: auto;
-    width: calc(100% - 20px);
-    border: 3px solid #1c1c1f;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    margin-left: 20px;
-    box-shadow: inset 1px 1px 0px 0px rgb(136 132 132);
-
-    .inset {
-      background: url("/tape.jpg");
-      background-size: 125%;
-      background-position: -40px -115px;
-      border-radius: 10px;
-      width: 340px;
-      height: 60px;
-      position: relative;
-      margin: 0 auto;
-    }
-
-    .shadow {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      box-shadow:
-        inset 1px 1px 0px 0px rgb(0 0 0),
-        inset 40px 20px 20px rgb(0 0 0 / 95%),
-        inset -5px -10px 10px rgb(0 0 0 / 25%),
-        inset -1px -1px 1px 0px rgba(255, 255, 255, 0.25);
-      border: 1px solid #171718;
-      z-index: 1;
-      border-radius: 5px;
-    }
-    .rotaters {
-      display: flex;
-      gap: 80px;
-      overflow: hidden;
-      height: 60px;
-      justify-content: center;
-    }
-    .rotater {
-      background-color: red;
-      width: 80px;
-      height: 80px;
-      background: url("/rotator.png");
-      background-size: contain;
-      background-repeat: no-repeat;
-      margin-top: -10px;
-    }
-    /* .rot1 {
-      animation: spin 4s linear infinite;
-    }
-    .rot2 {
-      animation: spin 12s linear infinite;
-    } */
-    /* .paused {
-      animation-play-state: paused !important;
-    } */
-  }
-
-  /* @keyframes spin {
-    from {
-      transform: rotate(0deg);
-    }
-    to {
-      transform: rotate(360deg);
-    }
-  } */
 </style>
