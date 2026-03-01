@@ -13,6 +13,7 @@
     max,
     value = $bindable(),
     onchange,
+    label,
     labelLeft,
     labelRight,
     color,
@@ -67,35 +68,38 @@
   }
 </script>
 
-<div class="knobx {color}">
-  <div
-    class="knobcontainer"
-    bind:this={containerEl}
-    onpointermove={rotate}
-    onpointerup={stopRotate}
-    onpointerleave={stopRotate}
-  >
-    <div class="knob" onpointerdown={startRotate} class:dragging={rotating}>
-      <div class="layer1">
-        <div class="layer2">
-          <div class="layer3">
-            <div
-              class="layer4"
-              style="rotate: {mapToKnob(normalizeValue(value))}turn"
-            >
-              <div class="layer5">
-                <div class="line1"></div>
-                <div class="line2"></div>
+<div class="knob-frame {color}">
+  <div class="knob-label">{label}</div>
+  <div class="knobx">
+    <div
+      class="knobcontainer"
+      bind:this={containerEl}
+      onpointermove={rotate}
+      onpointerup={stopRotate}
+      onpointerleave={stopRotate}
+    >
+      <div class="knob" onpointerdown={startRotate} class:dragging={rotating}>
+        <div class="layer1">
+          <div class="layer2">
+            <div class="layer3">
+              <div
+                class="layer4"
+                style="rotate: {mapToKnob(normalizeValue(value))}turn"
+              >
+                <div class="layer5">
+                  <div class="line1"></div>
+                  <div class="line2"></div>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="labels">
-    <span class="ui-label">&nbsp;{labelLeft}</span>
-    <span class="ui-label">&nbsp;{labelRight}</span>
+    <div class="labels">
+      <span class="ui-label">&nbsp;{labelLeft}</span>
+      <span class="ui-label">&nbsp;{labelRight}</span>
+    </div>
   </div>
 </div>
 
@@ -108,6 +112,17 @@
     user-select: none;
     container-type: inline-size;
     width: 7cqw;
+  }
+  .knob-label {
+    position: absolute;
+    margin-top: -2.5cqh;
+    margin-left: -2.8cqh;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 1.8cqh;
+    letter-spacing: 0.1cqh;
+    text-align: right;
+    font-weight: bold;
   }
   .knobcontainer {
     width: 90cqw;

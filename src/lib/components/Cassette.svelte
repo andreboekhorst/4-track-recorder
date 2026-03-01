@@ -69,8 +69,8 @@
   .casette {
     height: 100%;
     container-type: inline-size;
-    border: 0.75cqw solid #1c1c1f;
-    border-radius: 1cqw;
+    border: 0.2cqw solid #1c1c1f;
+    border-radius: 0.5cqw;
     box-shadow: inset 0.25cqw 0.25cqw 0 0 rgb(136 132 132);
   }
 

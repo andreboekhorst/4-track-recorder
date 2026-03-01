@@ -39,8 +39,6 @@
     background-repeat: no-repeat;
     width: 180px;
     height: 80px;
-    margin-top: 30px;
-    margin-left: 40px;
     position: relative;
     user-select: none;
     line-height: 40px;

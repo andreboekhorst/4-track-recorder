@@ -4,6 +4,7 @@
   import Knob from "$lib/components/els/Knob.svelte"
   import Lights from "$lib/components/els/Lights.svelte"
   import Slider from "$lib/components/els/Slider.svelte"
+  import SlideSelect from "$lib/components/els/SlideSelect.svelte"
   import Timestamp from "$lib/components/els/Timestamp.svelte"
   import Cassette from "$lib/components/Cassette.svelte"
   import TransportButtons from "$lib/components/TransportButtons.svelte"
@@ -75,6 +76,7 @@
         max={1}
         bind:value={track.pan}
         onchange={(pan) => engine.setTrackPan(i, pan)}
+        label={"TRK " + (i + 1)}
         labelLeft="L"
         labelRight="R"
         color="pink"
@@ -85,9 +87,11 @@
   <div class="frame">
     <div class="app">
       <div class="parent">
-        <!-- Mixer: Master -->
-        <div class="master cell-center" style="grid-area: 2 / 3 / 3 / 4">
+        <div class="cell-center" style="grid-area: 2 / 2 / 3 / 3">
           <span class="ui-label">Phones</span>
+        </div>
+
+        <div class="master cell-center" style="grid-area: 2 / 3 / 3 / 4">
           <div class="phonos-button">
             <Knob
               min={0}
@@ -112,34 +116,57 @@
         <div class="ui-label cell-center" style="grid-area: 7 / 4 / 8 / 5">
           Pan
         </div>
+        <div class="ui-label cell-center" style="grid-area: 8 / 3 / 9 / 5">
+          -- Output --
+        </div>
+
+        <div class="cell-center" style="grid-area: 1 / 5 / 9 / 6">
+          <div class="separator"></div>
+        </div>
+
+        <div class="cell-center" style="grid-area: 5 / 6 / 7 / 7">
+          <SlideSelect />
+        </div>
+
+        <div class="ui-label cell-center" style="grid-area: 8 / 6 / 9 / 7">
+          Track
+        </div>
+
+        <div class="cell-center" style="grid-area: 1 / 7 / 9 / 8">
+          <div class="separator"></div>
+        </div>
 
         <!-- Input Controls -->
-        <div class="cell-center" style="grid-area: 2 / 6 / 3 / 7">
+        <div class="cell-center" style="grid-area: 3 / 8 / 4 / 9">
           <Knob
             min={-1}
             max={1}
             bind:value={engine.trimValue}
             onchange={(trim) => engine.setTrim(trim)}
+            label="TRIM"
             labelLeft="LINE"
             labelRight="MIC"
             color="red"
           />
         </div>
 
-        <div class="cell-center" style="grid-area: 3 / 6 / 7 / 7">
+        <div class="cell-center" style="grid-area: 4 / 8 / 7 / 9">
           <Slider />
         </div>
 
-        <div class="ui-label cell-center" style="grid-area: 7 / 6 / 8 / 7">
+        <div class="ui-label cell-center" style="grid-area: 8 / 8 / 9 / 9">
           Input
         </div>
 
-        <!-- Transport -->
-        <div class="cell-center" style="grid-area: 2 / 8 / 3 / 10">
+        <div class="cell-center" style="grid-area: 1 / 9 / 9 / 10">
+          <div class="separator"></div>
+        </div>
+
+        <div class="cell-center" style="grid-area: 2 / 10 / 3 / 11">
           <Timestamp timestamp={engine.position} />
         </div>
 
-        <div style="grid-area: 3 / 8 / 6 / 10">
+        <div style="grid-area: 3 / 10 / 6 / 13">
           <Cassette
             {speed}
             time={engine.position}
@@ -149,7 +176,7 @@
           />
         </div>
 
-        <div style="grid-area: 6 / 8 / 8 / 10">
+        <div style="grid-area: 6 / 10 / 9 / 12">
           <TransportButtons {engine} {selectedTrack} bind:speed />
         </div>
       </div>
@@ -170,10 +197,20 @@
 {/if}
 
 <style>
+  .separator {
+    height: 100%;
+    width: 20px;
+    width: 0.45cqw;
+    border-radius: 0 0 0.15cqw 0.15cqw;
+    box-shadow:
+      inset 2px 2px 1px rgb(19 18 18 / 75%),
+      inset 1px 1px 1px rgba(31, 31, 31, 0.45),
+      inset -1px -1px 1px rgba(255, 252, 252, 0.35);
+  }
   .parent {
     display: grid;
-    grid-template-columns: 4cqw 1fr 1fr 1fr 4cqw 1fr 4cqw 1fr 1fr 4cqw;
-    grid-template-rows: repeat(8, 1fr);
+    grid-template-columns: 4cqw 1fr 1fr 1fr 1fr 1fr 4cqw 1fr 4cqw 20cqw 20cqw 4cqw;
+    grid-template-rows: 6cqh 1fr 1fr 1fr 1fr 1fr 6cqh 6cqh 6cqh;
     grid-column-gap: 0px;
     grid-row-gap: 0px;
     height: 100%;
