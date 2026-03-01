@@ -8,10 +8,10 @@
   }: { engine: AudioEngine; selectedTrack: number; speed: number } = $props()
 
   let btns = $state({
-    rec: { pressed: false },
+    record: { pressed: false },
     play: { pressed: false },
     rew: { pressed: false },
-    fwd: { pressed: false },
+    ffwd: { pressed: false },
     stop: { pressed: false },
     pause: { pressed: false },
   })
@@ -59,16 +59,16 @@
         if (isPaused) {
           engine.stop()
         } else {
-          if (btns.rec.pressed) {
+          if (btns.record.pressed) {
             engine.record(selectedTrack)
           } else if (btns.play.pressed) {
             engine.play()
           }
         }
         break
-      case "rec":
+      case "record":
         reset()
-        btns.rec.pressed = true
+        btns.record.pressed = true
         btns.play.pressed = true
         engine.stop()
         if (!isPaused) engine.record(selectedTrack)
@@ -78,9 +78,9 @@
         btns.rew.pressed = true
         speed = -8
         break
-      case "fwd":
+      case "ffwd":
         reset()
-        btns.fwd.pressed = true
+        btns.ffwd.pressed = true
         speed = 8
         break
     }
@@ -115,6 +115,8 @@
     flex-direction: column;
     align-items: center;
     container-type: inline-size;
+    flex: 1; /* if parent container is flex */
+    padding: 0 0 0 2cqw;
   }
   .controlBtns {
     background: linear-gradient(to bottom right, #3d3c43, #646468);
@@ -171,7 +173,7 @@
       mix-blend-mode: overlay;
       background-repeat: no-repeat;
     }
-    &.rec:before {
+    &.record:before {
       background-image: url("/btn_rec.svg");
     }
     &.play:before {
@@ -183,7 +185,7 @@
     &.rew:before {
       background-image: url("/btn_rew.svg");
     }
-    &.fwd:before {
+    &.ffwd:before {
       background-image: url("/btn_fwd.svg");
     }
     &.stop:before {

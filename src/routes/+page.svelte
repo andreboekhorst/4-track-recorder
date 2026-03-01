@@ -128,16 +128,12 @@
           <SlideSelect />
         </div>
 
-        <div class="ui-label cell-center" style="grid-area: 8 / 6 / 9 / 7">
+        <div class="ui-label cell-center" style="grid-area: 7 / 6 / 8 / 7">
           Track
         </div>
 
-        <div class="cell-center" style="grid-area: 1 / 7 / 9 / 8">
-          <div class="separator"></div>
-        </div>
-
         <!-- Input Controls -->
-        <div class="cell-center" style="grid-area: 3 / 8 / 4 / 9">
+        <div class="cell-center" style="grid-area: 3 / 6 / 4 / 9">
           <Knob
             min={-1}
             max={1}
@@ -154,8 +150,12 @@
           <Slider />
         </div>
 
-        <div class="ui-label cell-center" style="grid-area: 8 / 8 / 9 / 9">
-          Input
+        <div class="ui-label cell-center" style="grid-area: 7 / 8 / 8 / 9">
+          Vol
+        </div>
+
+        <div class="ui-label cell-center" style="grid-area: 8 / 6 / 9 / 9">
+          -- Input --
         </div>
 
         <div class="cell-center" style="grid-area: 1 / 9 / 9 / 10">
@@ -164,6 +164,10 @@
 
         <div class="cell-center" style="grid-area: 2 / 10 / 3 / 11">
           <Timestamp timestamp={engine.position} />
+        </div>
+
+        <div class="cell-center" style="grid-area: 2 / 11 / 3 / 12">
+          <div class="logo"></div>
         </div>
 
         <div style="grid-area: 3 / 10 / 6 / 13">
@@ -176,7 +180,7 @@
           />
         </div>
 
-        <div style="grid-area: 6 / 10 / 9 / 12">
+        <div class="cell-bottom" style="grid-area: 6 / 10 / 9 / 12">
           <TransportButtons {engine} {selectedTrack} bind:speed />
         </div>
       </div>
@@ -239,7 +243,13 @@
       inset -2px -2px 4px rgba(0, 0, 0, 0.3);
   }
 
-  .master {
+  .logo {
+    background: url("/logo.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: top right;
+    width: 100%;
+    height: 20px;
   }
 
   .file-controls {

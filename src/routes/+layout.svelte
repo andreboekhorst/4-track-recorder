@@ -29,10 +29,16 @@
     justify-content: center;
   }
 
+  :global(.cell-bottom) {
+    display: flex;
+    align-items: end;
+    justify-content: center;
+  }
+
   :global(.ui-label) {
     color: rgba(255, 255, 255, 0.6);
     text-transform: uppercase;
     /* letter-spacing: 0.1vw; */
-    font-size: 1vw;
+    font-size: 0.8vw;
   }
 </style>

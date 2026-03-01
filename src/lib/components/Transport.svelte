@@ -160,6 +160,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 0 100px;
   }
   .controlBtns {
     background: linear-gradient(to bottom right, #3d3c43, #646468);

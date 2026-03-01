@@ -34,27 +34,49 @@
   }
 </script>
 
-<div
-  bind:this={trackEl}
-  class="track"
-  onpointermove={move}
-  onpointerup={stop}
-  onpointerleave={stop}
-  role="slider"
->
+<div class="slider-holder">
   <div
-    class="thumb"
-    class:dragging
-    onpointerdown={start}
-    style="top: {topPercent}%; height: {btnHeight * 100}%"
-  ></div>
-  <div
-    class="slot"
+    class="slider-indicator"
     style="height: {(1 - btnHeight) * 100}%; top: {(btnHeight / 2) * 100}%"
   ></div>
+  <div
+    bind:this={trackEl}
+    class="track"
+    onpointermove={move}
+    onpointerup={stop}
+    onpointerleave={stop}
+    role="slider"
+  >
+    <div
+      class="thumb"
+      class:dragging
+      onpointerdown={start}
+      style="top: {topPercent}%; height: {btnHeight * 100}%"
+    ></div>
+    <div
+      class="slot"
+      style="height: {(1 - btnHeight) * 100}%; top: {(btnHeight / 2) * 100}%"
+    ></div>
+  </div>
 </div>
 
 <style>
+  .slider-holder {
+    height: 100%;
+    display: flex;
+  }
+
+  .slider-indicator {
+    position: relative;
+    background: url("/slider-indicator.svg");
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 36px;
+    height: 100%;
+    background-position: center;
+    opacity: 0.7;
+  }
+
   .track {
     width: 30px;
     height: 100%;
