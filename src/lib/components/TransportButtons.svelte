@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { AudioEngine } from "$lib"
+  import Light from "$lib/components/els/Light.svelte"
 
   let {
     engine,
@@ -89,9 +90,7 @@
 
 <div class="ctrlButtons">
   <div class="rec-light">
-    <div class="light-bevel">
-      <div class="light high" class:active={btns.record.pressed}>&nbsp;</div>
-    </div>
+    <Light color="red" active={btns.record.pressed} />
   </div>
   <div class="btnLabels">
     {#each Object.entries(btns) as [type, btn]}
@@ -118,8 +117,8 @@
   .rec-light {
     position: absolute;
     height: 20px;
-    width: 45px;
-    left: -10px;
+    width: 40px;
+    left: -5px;
     &.active {
       opacity: 1;
     }
@@ -129,35 +128,6 @@
       border-top: 2px solid white;
       width: 10px;
     } */
-  }
-
-  .light-bevel {
-    background: linear-gradient(to bottom, #101010, #6b6b6b);
-    top: 2px;
-    left: 2px;
-    height: 18px;
-    width: 18px;
-    margin-bottom: 12px;
-    border-radius: 15px;
-    position: relative;
-  }
-
-  .light {
-    position: absolute;
-    width: 16px;
-    height: 16px;
-    top: 1px;
-    left: 1px;
-    border-radius: 16px;
-    background: #8f3333;
-    box-shadow: inset 1px -1px 4px 3px rgba(62, 2, 2, 0.7);
-
-    &.active {
-      background: #ff0000;
-      box-shadow:
-        inset 0px 0px 6px rgba(32, 1, 1, 0.9),
-        0px 0px 16px 16px rgba(209, 24, 24, 0.1);
-    }
   }
 
   .ctrlButtons {
@@ -199,6 +169,12 @@
     .record {
       color: rgb(200, 60, 35);
       text-shadow: 0px 0px 2px #0000007d;
+      transform: translateX(-3cqw);
+      &:before {
+        content: "─ ";
+        color: white;
+        opacity: 0.4;
+      }
     }
   }
   .btn {

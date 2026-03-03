@@ -39,40 +39,49 @@
   }
 </script>
 
-<div class="casette">
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div
-    class="window"
-    onpointerdown={startDrag}
-    onpointermove={drag}
-    onpointerup={stopDrag}
-    onpointerleave={stopDrag}
-    bind:this={containerEl}
-  >
-    <div class="window_inset">
-      <div class="shadow"></div>
-      <div class="rotaters">
-        <div
-          class="rotater rot1"
-          style:transform={"rotate(" + (time * 270) / 10 + "deg)"}
-        ></div>
-        <div
-          class="rotater rot2"
-          style:transform={"rotate(" + (time * 180) / 10 + "deg)"}
-        ></div>
+<div class="casette_gutter">
+  <div class="casette">
+    <!-- svelte-ignore a11y_no_static_element_interactions -->
+    <div
+      class="window"
+      onpointerdown={startDrag}
+      onpointermove={drag}
+      onpointerup={stopDrag}
+      onpointerleave={stopDrag}
+      bind:this={containerEl}
+    >
+      <div class="window_inset">
+        <div class="shadow"></div>
+        <div class="rotaters">
+          <div
+            class="rotater rot1"
+            style:transform={"rotate(" + (time * 270) / 10 + "deg)"}
+          ></div>
+          <div
+            class="rotater rot2"
+            style:transform={"rotate(" + (time * 180) / 10 + "deg)"}
+          ></div>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <style>
-  .casette {
+  .casette_gutter {
     height: 95%;
-    container-type: size;
-    border-top: 0.8cqh solid #1a1a1b;
-    border-left: 0.3cqw solid #1a1a1b;
-    border-bottom: 0.8cqh solid #1a1a1b;
     border-radius: 0.8cqw 0 0 0.8cqw;
+    background: #1a1a1b;
+    padding: 0.8cqh 0 0.8cqh 0.35cqw;
+    box-shadow: inset 0cqw -0.15cqw 0 0 rgba(136, 132, 132, 0.761);
+  }
+  .casette {
+    height: 100%;
+    container-type: size;
+    /* border-top: 0.8cqh solid #1a1a1b00;
+    border-left: 0.3cqw solid #1a1a1b00;
+    border-bottom: 0.8cqh solid #1a1a1b00; */
+    border-radius: 0.4cqw 0 0 0.8cqw;
     box-shadow: inset 0.15cqw 0.15cqw 0 0 rgb(136 132 132);
     background: radial-gradient(ellipse at top left, #5d6066, #383840);
   }
