@@ -279,6 +279,19 @@
     border-radius: 10px 10px 36px 36px;
     height: 100cqh;
     box-shadow: inset 0.2cqw 0.5cqh 0.4cqw rgb(225 225 225 / 50%);
+    position: relative;
+  }
+
+  .app:before {
+    content: " ";
+    width: 100%;
+    height: 100%;
+    display: block;
+    background: url("/noise_100.jpg");
+    background-size: 50px;
+    mix-blend-mode: multiply;
+    position: absolute;
+    opacity: 0.9;
   }
 
   .logos {

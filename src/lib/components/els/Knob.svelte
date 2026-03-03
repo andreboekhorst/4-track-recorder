@@ -198,7 +198,6 @@
       display: flex;
       justify-content: center;
       align-items: center;
-
       box-shadow: 30cqw 23cqw 25cqw rgba(0, 0, 0, 0.4);
     }
 
@@ -216,7 +215,7 @@
       position: relative;
       width: 100%;
       height: 100%;
-      mix-blend-mode: overlay;
+      /* mix-blend-mode: overlay; */
 
       .line1 {
         position: absolute;
@@ -235,8 +234,6 @@
         top: -12cqw;
         border-radius: 1.5cqw;
       }
-    }
-    .layer5 {
     }
   }
   .knob.dragging {
