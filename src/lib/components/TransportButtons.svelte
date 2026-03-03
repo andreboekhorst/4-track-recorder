@@ -198,6 +198,7 @@
     }
     .record {
       color: rgb(200, 60, 35);
+      text-shadow: 0px 0px 2px #0000007d;
     }
   }
   .btn {

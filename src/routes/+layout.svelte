@@ -13,6 +13,7 @@
 <style>
   :global(*) {
     box-sizing: border-box;
+    outline: none;
   }
 
   :global(html) {

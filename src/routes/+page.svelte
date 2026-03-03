@@ -118,8 +118,8 @@
         <div class="ui-label cell-center" style="grid-area: 7 / 4 / 8 / 5">
           Pan
         </div>
-        <div class="ui-label cell-center" style="grid-area: 8 / 3 / 9 / 5">
-          -- Output --
+        <div class="cell-center" style="grid-area: 8 / 3 / 9 / 5">
+          <span class="output ui-label">└── Output ──┘</span>
         </div>
 
         <div class="cell-center" style="grid-area: 1 / 5 / 9 / 6">
@@ -130,7 +130,10 @@
           <SlideSelect bind:value={selectedTrack} />
         </div>
 
-        <div class="ui-label cell-center" style="grid-area: 7 / 6 / 8 / 7">
+        <div
+          class="ui-label cell-right"
+          style="grid-area: 7 / 6 / 8 / 7; text-align: right"
+        >
           Track
         </div>
 
@@ -181,14 +184,14 @@
         </div>
 
         <div class="ui-label cell-center" style="grid-area: 8 / 6 / 9 / 8">
-          -- Input --
+          └─ Input ─┘
         </div>
 
         <div class="cell-center" style="grid-area: 1 / 8 / 9 / 9">
           <div class="separator"></div>
         </div>
 
-        <div class="cell-center" style="grid-area: 2 / 9 / 3 / 10">
+        <div class="cell-timestamp" style="grid-area: 2 / 9 / 3 / 11">
           <Timestamp timestamp={engine.position} />
         </div>
 
@@ -250,7 +253,7 @@
   }
   .parent {
     display: grid;
-    grid-template-columns: 4cqw 4cqw 10cqw 10cqw 4cqw 6cqw 8cqw 5cqw 1fr 1fr 1fr 4cqw;
+    grid-template-columns: 4cqw 4cqw 10cqw 10cqw 4cqw 4cqw 8cqw 5cqw 1fr 1fr 1fr 4cqw;
     grid-template-rows: 5cqh 15cqh 1fr 1fr 1fr 1fr 4cqh 4cqh 6cqh;
     grid-column-gap: 0px;
     grid-row-gap: 0px;
@@ -260,7 +263,7 @@
   .frame {
     container-type: size;
     background: linear-gradient(to bottom, #616161, #3b3b3b);
-    padding: 4px;
+    padding: 2px;
     border-radius: 12px 12px 40px 40px;
     aspect-ratio: 1 / 0.6;
     max-height: 80vh;
@@ -275,15 +278,13 @@
     background: radial-gradient(ellipse at top left, #686b71, #383840);
     border-radius: 10px 10px 36px 36px;
     height: 100cqh;
-    box-shadow:
-      inset 1px 1px 4px rgba(255, 255, 255, 0.8),
-      inset -2px -2px 4px rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0.2cqw 0.5cqh 0.4cqw rgb(225 225 225 / 50%);
   }
 
   .logos {
     display: flex;
     flex-direction: column;
-    gap: 4.5cqh;
+    gap: 5cqh;
   }
   .logo {
     background: url("/logo.svg");
@@ -291,7 +292,7 @@
     background-size: contain;
     background-position: top right;
     width: 100%;
-    height: 3cqh;
+    height: 2.75cqh;
   }
 
   .logo-tag {
@@ -300,7 +301,7 @@
     background-size: contain;
     background-position: top right;
     width: 100%;
-    height: 3cqh;
+    height: 2.75cqh;
     opacity: 0.6;
   }
 
@@ -341,5 +342,9 @@
       display: flex;
       justify-content: center;
     }
+  }
+  .cell-timestamp {
+    padding-top: 1.5cqh;
+    padding-left: 4cqw;
   }
 </style>

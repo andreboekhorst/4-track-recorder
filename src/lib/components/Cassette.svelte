@@ -27,7 +27,7 @@
     const xMove = e.clientX - xPos // it should be the difference from where it initially started.
 
     // never drag more than 1, altought we later also need to
-    let _dragPercentage = xMove / rect.width / 8
+    let _dragPercentage = xMove / rect.width / 16
 
     let _time = Math.max(0, Math.min(startPos + _dragPercentage * max, max))
     onchange?.(_time)

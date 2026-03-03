@@ -90,8 +90,8 @@
     background-repeat: no-repeat;
     background-size: contain;
     width: 100%;
-    height: 45cqh;
-    background-position: top;
+    height: 43cqh;
+    background-position: top right;
     opacity: 0.7;
     top: 10%;
   }
@@ -120,11 +120,12 @@
   }
 
   .thumb {
-    width: 80%;
-    margin: 0 10%;
+    width: 75%;
+    margin: 0 12%;
     background: url("/slideselect-thumb.png");
     background-size: 100% 100%;
     position: absolute;
+    border-radius: 1cqh;
     top: 0%;
     left: 0;
     cursor: grab;
