@@ -95,7 +95,7 @@
   </div>
   <div class="btnLabels">
     {#each Object.entries(btns) as [type, btn]}
-      <div class="btnLabel ui-label">{type}</div>
+      <div class="btnLabel ui-label {type}">{type}</div>
     {/each}
   </div>
   <div class="controlBtns">
@@ -119,10 +119,16 @@
     position: absolute;
     height: 20px;
     width: 45px;
-    left: -15px;
+    left: -10px;
     &.active {
       opacity: 1;
     }
+    /* &:before {
+      display: block;
+      content: " ";
+      border-top: 2px solid white;
+      width: 10px;
+    } */
   }
 
   .light-bevel {
@@ -190,6 +196,9 @@
       text-align: center;
       padding-bottom: 1.4cqw;
     }
+    .record {
+      color: rgb(200, 60, 35);
+    }
   }
   .btn {
     appearance: none;
@@ -251,5 +260,8 @@
   }
   .btn.active + .btn.active {
     box-shadow: 2.3cqw 2.3cqw 4.5cqw rgba(0, 0, 0, 0.6);
+  }
+  .after {
+    height: 5cqh;
   }
 </style>

@@ -2,7 +2,7 @@
 // and the transport state machine (play/pause/stop/record).
 // Delegates DSP, metering, and I/O to focused submodules.
 
-import type { AudioEngineConfig, PlayState, TrimFxConfig } from "../types.js"
+import type { AudioEngineConfig, MicStatus, PlayState, TrimFxConfig } from "../types.js"
 import { Track } from "./track.svelte.js"
 import {
   DEFAULT_CONFIG,
@@ -21,6 +21,7 @@ export class AudioEngine {
   // ─── Reactive state (read by UI) ────────────────────────────────────
 
   playState = $state<PlayState>("stopped")
+  micStatus = $state<MicStatus>("unsupported")
   position = $state(0)
   masterVolume = $state(1.0)
   latencyInfo = $state("")
@@ -137,6 +138,27 @@ export class AudioEngine {
     if (this.audioContextInitialized) return
     this.audioContextInitialized = true
     const ctx = this.ensureContext()
+
+    // Determine initial mic status
+    if (!navigator.mediaDevices?.getUserMedia) {
+      this.micStatus = "unsupported"
+    } else {
+      try {
+        const perm = await navigator.permissions.query({ name: "microphone" as PermissionName })
+        if (perm.state === "denied") this.micStatus = "denied"
+        else if (perm.state === "granted") this.micStatus = "inactive"
+        else this.micStatus = "prompt"
+
+        perm.addEventListener("change", () => {
+          if (perm.state === "denied") this.micStatus = "denied"
+          else if (perm.state === "granted" && this.micStatus !== "active") this.micStatus = "inactive"
+          else if (perm.state === "prompt") this.micStatus = "prompt"
+        })
+      } catch {
+        // Permissions API not supported for microphone — assume prompt
+        this.micStatus = "prompt"
+      }
+    }
     const configs = this.config.hiddenTracks ?? []
     const hiddenTracks = this.tracks.filter((t) => t.hidden)
 
@@ -376,17 +398,32 @@ export class AudioEngine {
     if (this.tracks[trackIndex].hidden) return
 
     if (!navigator.mediaDevices?.getUserMedia) {
+      this.micStatus = "unsupported"
       throw new Error("Recording requires a secure context (HTTPS). Please access this app over HTTPS.")
     }
 
     // Request mic access BEFORE any async work (initAudioContext fetches files)
     // to preserve the user gesture context, which iOS Safari requires.
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        ...AUDIO_CONSTRAINTS,
-        sampleRate: { ideal: this.config.sampleRate },
-      },
-    })
+    let stream: MediaStream
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          ...AUDIO_CONSTRAINTS,
+          sampleRate: { ideal: this.config.sampleRate },
+        },
+      })
+    } catch (err) {
+      if (err instanceof DOMException) {
+        if (err.name === "NotAllowedError") this.micStatus = "denied"
+        else if (err.name === "NotFoundError") this.micStatus = "no-device"
+        else this.micStatus = "error"
+      } else {
+        this.micStatus = "error"
+      }
+      throw err
+    }
+
+    this.micStatus = "active"
 
     await this.initAudioContext()
     const ctx = this.ensureContext()
@@ -527,6 +564,7 @@ export class AudioEngine {
 
     this.recordedChunks = []
     this.playState = "stopped"
+    this.micStatus = "inactive"
   }
 
   /** Updates the latencyInfo reactive state with a human-readable breakdown. */

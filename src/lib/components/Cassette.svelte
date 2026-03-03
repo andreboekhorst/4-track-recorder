@@ -67,30 +67,33 @@
 
 <style>
   .casette {
-    height: 100%;
-    container-type: inline-size;
+    height: 95%;
+    container-type: size;
     border: 0.2cqw solid #1c1c1f;
     border-radius: 0.5cqw;
     box-shadow: inset 0.25cqw 0.25cqw 0 0 rgb(136 132 132);
+    background: radial-gradient(ellipse at top left, #5d6066, #383840);
   }
 
   .window {
     background-color: #212124;
     border-radius: 1cqw;
     width: 85%;
-    margin: 25cqw auto;
-    padding: 2.5cqw 0;
+    margin: 38cqh 10cqw 20cqh 5cqw;
+    padding: 1.5cqw 8cqw;
     position: relative;
     cursor: ew-resize;
-
+    box-shadow:
+      inset 0.2cqw 0.2cqw 0.2cqw 0 rgba(0, 0, 0, 0.5),
+      inset -0.1cqw -0.1cqw 0.2cqw 0 rgba(255, 255, 255, 0.5);
     &:active {
       cursor: col-resize;
     }
 
     .window_inset {
-      background: url("/tape.jpg");
-      background-size: 125%;
-      background-position: -10cqw -28.75cqw;
+      background: url("/cassette.jpg");
+      background-size: 109%;
+      background-position: -5cqh -15cqw;
       border-radius: 2.5cqw;
       width: 100%;
       aspect-ratio: 5.7 / 1;
@@ -114,21 +117,35 @@
 
     .rotaters {
       display: flex;
-      gap: 20cqw;
+      gap: 16cqw;
       overflow: hidden;
-      height: 15cqw;
+      height: 22cqh;
       justify-content: center;
     }
 
     .rotater {
-      width: 20cqw;
-      height: 20cqw;
+      width: 16cqw;
+      height: 16cqw;
       background: url("/rotator.png");
       background-size: contain;
       background-repeat: no-repeat;
-      margin-top: -2.5cqw;
+      margin-top: -2.5cqh;
     }
 
+    &:after {
+      position: absolute;
+      content: " ";
+      display: block;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      background: linear-gradient(-35deg, #000000 70%, #ffffff 71%);
+      z-index: 100;
+      opacity: 0.05;
+      mix-blend-mode: screen;
+      border-radius: 1.25cqw;
+    }
     &:before {
       position: absolute;
       content: " ";

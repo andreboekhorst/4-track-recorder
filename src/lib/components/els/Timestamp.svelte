@@ -35,7 +35,7 @@
 <style>
   .wrapper {
     container-type: size;
-    height: 7cqh;
+    height: 9cqh;
     aspect-ratio: 180 / 80;
   }
   .counter {

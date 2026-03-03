@@ -111,12 +111,12 @@
     flex-direction: column;
     user-select: none;
     container-type: inline-size;
-    width: 7cqw;
+    width: 12cqh;
   }
   .knob-label {
     position: absolute;
     margin-top: -2.5cqh;
-    margin-left: -2.8cqh;
+    margin-left: -2.8cqw;
     text-transform: uppercase;
     color: rgba(255, 255, 255, 0.6);
     font-size: 1.8cqh;

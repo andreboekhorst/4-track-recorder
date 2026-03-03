@@ -41,3 +41,5 @@ export interface ProjectMetadata {
 }
 
 export type PlayState = 'stopped' | 'playing' | 'paused' | 'recording';
+
+export type MicStatus = 'unsupported' | 'prompt' | 'denied' | 'no-device' | 'inactive' | 'active' | 'error';

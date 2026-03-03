@@ -66,6 +66,7 @@
     width: 5cqw;
     display: flex;
     container-type: size;
+    padding-top: 2cqh;
   }
 
   .slider-indicator {

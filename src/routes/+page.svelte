@@ -2,6 +2,7 @@
   import { AudioEngine } from "$lib"
   import { onMount } from "svelte"
   import Knob from "$lib/components/els/Knob.svelte"
+  import Light from "$lib/components/els/Light.svelte"
   import Lights from "$lib/components/els/Lights.svelte"
   import Slider from "$lib/components/els/Slider.svelte"
   import SlideSelect from "$lib/components/els/SlideSelect.svelte"
@@ -132,6 +133,30 @@
           Track
         </div>
 
+        <div class="cell-center" style="grid-area: 2 / 6 / 3 / 8">
+          <div class="mic-status">
+            <div class="ui-label">mic status</div>
+            <div
+              class="mic-status-light"
+              title="Microphone status: {engine.micStatus}"
+            >
+              <Light
+                color={engine.micStatus === "prompt" ||
+                engine.micStatus === "active"
+                  ? "green"
+                  : "red"}
+                active={engine.micStatus === "active"}
+                pulsing={engine.micStatus === "no-device"
+                  ? "fast"
+                  : engine.micStatus === "inactive" ||
+                      engine.micStatus === "active"
+                    ? false
+                    : "slow"}
+              />
+            </div>
+          </div>
+        </div>
+
         <!-- Input Controls -->
         <div class="cell-center" style="grid-area: 3 / 6 / 4 / 8">
           <Knob
@@ -162,11 +187,11 @@
           <div class="separator"></div>
         </div>
 
-        <div class="cell-center" style="grid-area: 2 / 10 / 3 / 11">
+        <div class="cell-center" style="grid-area: 2 / 9 / 3 / 10">
           <Timestamp timestamp={engine.position} />
         </div>
 
-        <div class="logos" style="grid-area: 2 / 10 / 3 / 12">
+        <div class="logos" style="grid-area: 2 / 11 / 3 / 12">
           <div class="logo"></div>
           <div class="logo-tag"></div>
         </div>
@@ -214,8 +239,8 @@
   }
   .parent {
     display: grid;
-    grid-template-columns: 4cqw 4cqw 1fr 1fr 3cqw 5cqw 8cqw 4cqw 11cqw 11cqw 22cqw 10cqw;
-    grid-template-rows: 5cqh 14cqh 1fr 1fr 1fr 1fr 4cqh 4cqh 6cqh;
+    grid-template-columns: 4cqw 4cqw 10cqw 10cqw 4cqw 6cqw 8cqw 5cqw 1fr 1fr 1fr 4cqw;
+    grid-template-rows: 5cqh 15cqh 1fr 1fr 1fr 1fr 4cqh 4cqh 6cqh;
     grid-column-gap: 0px;
     grid-row-gap: 0px;
     height: 100%;
@@ -230,6 +255,9 @@
     max-height: 80vh;
     max-width: 85nvw;
     margin: 0 auto;
+    min-width: 960px;
+    min-height: 576px;
+    user-select: none;
   }
 
   .app {
@@ -244,7 +272,7 @@
   .logos {
     display: flex;
     flex-direction: column;
-    gap: 5cqh;
+    gap: 4.5cqh;
   }
   .logo {
     background: url("/logo.svg");
@@ -252,7 +280,7 @@
     background-size: contain;
     background-position: top right;
     width: 100%;
-    height: 18px;
+    height: 3cqh;
   }
 
   .logo-tag {
@@ -261,8 +289,8 @@
     background-size: contain;
     background-position: top right;
     width: 100%;
-    height: 22px;
-    opacity: 0.7;
+    height: 3cqh;
+    opacity: 0.6;
   }
 
   .file-controls {
@@ -289,5 +317,18 @@
   button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .mic-status {
+    text-align: center;
+    cursor: help;
+    transform: translateY(-2cqh);
+    .ui-label {
+      margin-bottom: 2cqh;
+    }
+    .mic-status-light {
+      display: flex;
+      justify-content: center;
+    }
   }
 </style>
