@@ -16,6 +16,11 @@
   let speed = $state(0)
   let recordEngaged = $state(false)
 
+  // Url Upload
+  let uploadFile = $state()
+  let loadProgress = $state(0)
+  let loadError = $state(false)
+
   onMount(() => {
     engine = new AudioEngine({
       hiddenTracks: [{ url: "casette_hiss.mp3", volume: 0.08 }],
@@ -44,6 +49,34 @@
     if (file && engine) {
       engine.importProject(file)
       fileInput.value = ""
+    }
+  }
+
+  async function handleUrlLoad(url: string) {
+    if (!url) return
+    loadError = false
+    try {
+      const response = await fetch(url)
+      const total = Number(response.headers.get("Content-Length")) || 0
+      const reader = response.body!.getReader()
+      const chunks: Uint8Array[] = []
+      let received = 0
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+        chunks.push(value)
+        received += value.length
+        if (total) loadProgress = Math.round((received / total) * 100)
+      }
+
+      const blob = new Blob(chunks)
+      const file = new File([blob], "remote.4trk")
+      await engine?.importProject(file)
+    } catch {
+      loadError = true
+    } finally {
+      loadProgress = 0
     }
   }
 </script>
@@ -98,15 +131,25 @@
   {/snippet}
   <header>
     <div class="file-controls">
-      <!-- <button onclick={handleSave} disabled={!engine.hasContent}>Save</button>
-      <button onclick={handleLoad}>Load</button> -->
+      <!-- <input type="text" bind:value={uploadFile} />
+      <button
+        onclick={() => {
+          handleUrlLoad(uploadFile)
+        }}>Upload</button
+      >
+      {#if loadProgress > 0}
+        {loadProgress}%
+      {/if}
+
+      <button onclick={handleSave} disabled={!engine.hasContent}>Save</button>
+      <button onclick={handleLoad}>Load</button>
       <input
         type="file"
         accept=".4trk"
         bind:this={fileInput}
         onchange={handleFileChange}
         hidden
-      />
+      /> -->
 
       <a
         class="github-button"
@@ -229,7 +272,20 @@
           <div class="separator"></div>
         </div>
 
-        <div class="cell-timestamp" style="grid-area: 2 / 9 / 3 / 11">
+        <div class="cell-center" style="grid-area: 2 / 9 / 3 / 10">
+          <div class="mic-status">
+            <div class="ui-label">power</div>
+            <div class="mic-status-light" title="Cassette status: xx">
+              <Light
+                color={loadError ? "red" : "green"}
+                active={true}
+                pulsing={loadError ? "fast" : false}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="cell-timestamp" style="grid-area: 2 / 10 / 3 / 11">
           <Timestamp timestamp={engine.position} />
         </div>
 
@@ -274,7 +330,7 @@
   }
   .parent {
     display: grid;
-    grid-template-columns: 4cqw 4cqw 10cqw 10cqw 4cqw 4cqw 8cqw 5cqw 1fr 1fr 1fr 4cqw;
+    grid-template-columns: 4cqw 4cqw 10cqw 10cqw 4cqw 4cqw 8cqw 5cqw 10cqw 1fr 1fr 4cqw;
     grid-template-rows: 5cqh 15cqh 1fr 1fr 1fr 1fr 4cqh 4cqh 6cqh;
     grid-column-gap: 0px;
     grid-row-gap: 0px;
@@ -308,7 +364,7 @@
     position: relative;
   }
 
-  .app:before {
+  /* .app:before {
     content: " ";
     width: 100%;
     height: 100%;
@@ -319,7 +375,7 @@
     position: absolute;
     opacity: 0.9;
     border-radius: 10px 10px 36px 36px;
-  }
+  } */
 
   .logos {
     display: flex;
@@ -377,7 +433,7 @@
     }
   }
   .cell-timestamp {
-    padding-top: 1.5cqh;
-    padding-left: 4cqw;
+    padding-top: 3cqh;
+    padding-left: 2cqw;
   }
 </style>
