@@ -97,7 +97,7 @@
 
 <div class="ctrlButtons">
   <div class="rec-light">
-    <Light color="red" active={btns.record.pressed} />
+    <Light color="red" active={btns.record.pressed} pulsing={btns.record.pressed && isPaused ? "slow" : false} />
   </div>
   <div class="btnLabels">
     {#each Object.entries(btns) as [type, btn]}
