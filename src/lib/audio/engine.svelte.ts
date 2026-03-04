@@ -291,7 +291,7 @@ export class AudioEngine {
 
   /** Stops playback or recording. If recording, finalizes and merges the recorded audio. */
   stop(): void {
-    if (this.recorderWorkletNode) {
+    if (this.playState === "recording") {
       this.stopRecording()
       return
     }
@@ -389,11 +389,14 @@ export class AudioEngine {
     }
   }
 
-  // ─── Recording ──────────────────────────────────────────────────────
+  // ─── Monitoring ─────────────────────────────────────────────────────
 
-  /** Arms and starts recording on the given track. Sets up mic input, FX chain, and monitoring. */
-  async record(trackIndex: number): Promise<void> {
-    if (this.playState === "recording") return
+  /** Sets up mic input chain for live monitoring (pass-through to speakers).
+   *  Can be called independently of recording (e.g. record armed + paused). */
+  async startMonitoring(trackIndex: number): Promise<void> {
+    // Already monitoring — nothing to do
+    if (this.recorderSourceNode) return
+
     if (trackIndex < -1 || trackIndex >= this.tracks.length) return
     if (trackIndex >= 0 && this.tracks[trackIndex].hidden) return
 
@@ -402,8 +405,8 @@ export class AudioEngine {
       throw new Error("Recording requires a secure context (HTTPS). Please access this app over HTTPS.")
     }
 
-    // Request mic access BEFORE any async work (initAudioContext fetches files)
-    // to preserve the user gesture context, which iOS Safari requires.
+    // Acquire mic — must be the FIRST await to stay within the
+    // user-gesture window that iOS Safari enforces for getUserMedia.
     let stream: MediaStream
     try {
       stream = await navigator.mediaDevices.getUserMedia({
@@ -429,14 +432,12 @@ export class AudioEngine {
     const ctx = this.ensureContext()
     await ctx.resume()
 
-    const recordLatencySeconds = measureRecordLatency(stream, ctx)
-    this.updateLatencyDisplay(recordLatencySeconds)
-
+    // Build input chain: mic → inputGain → [FX] → recVol → worklet → destination
+    // The worklet passes audio through to destination for live monitoring.
     await ctx.audioWorklet.addModule(this.config.workletUrl)
     const source = ctx.createMediaStreamSource(stream)
     const worklet = new AudioWorkletNode(ctx, "recorder")
 
-    // Input chain: source → inputGain → [fx nodes] → recVol → worklet → destination
     this.inputGainNode = ctx.createGain()
     this.inputGainNode.gain.value = 1.0
 
@@ -462,14 +463,60 @@ export class AudioEngine {
     this.recVolNode.connect(worklet)
     worklet.connect(ctx.destination)
 
+    this.recorderSourceNode = source
+    this.recorderWorkletNode = worklet
+  }
+
+  /** Tears down the mic input chain and releases the microphone. */
+  stopMonitoring(): void {
+    // Disconnect input processing chain
+    this.inputGainNode?.disconnect()
+    for (const node of this.inputFxNodes) node.disconnect()
+    this.inputFxNodes = []
+    this.recVolNode?.disconnect()
+    this.inputGainNode = null
+    this.trimGainNode = null
+    this.waveShaperNode = null
+    this.recVolNode = null
+
+    const source = this.recorderSourceNode
+    const worklet = this.recorderWorkletNode
+    this.recorderSourceNode = null
+    this.recorderWorkletNode = null
+
+    if (source) source.disconnect()
+    if (worklet) worklet.port.onmessage = null
+    worklet?.disconnect()
+    if (source?.mediaStream)
+      source.mediaStream.getTracks().forEach((t) => t.stop())
+
+    this.micStatus = "inactive"
+  }
+
+  // ─── Recording ──────────────────────────────────────────────────────
+
+  /** Arms and starts recording on the given track. Reuses monitoring if already active. */
+  async record(trackIndex: number): Promise<void> {
+    if (this.playState === "recording") return
+
+    // Ensure mic input chain is set up (no-op if already monitoring)
+    await this.startMonitoring(trackIndex)
+
+    const ctx = this.ensureContext()
+    const stream = this.recorderSourceNode!.mediaStream
+
+    // Measure round-trip latency for alignment when merging
+    const recordLatencySeconds = measureRecordLatency(stream, ctx)
+    this.updateLatencyDisplay(recordLatencySeconds)
+
+    // Start collecting PCM chunks from the worklet
     this.recordedChunks = []
-    worklet.port.onmessage = (e: MessageEvent) => {
+    this.recorderWorkletNode!.port.onmessage = (e: MessageEvent) => {
       if (e.data?.type === "pcm" && e.data.data)
         this.recordedChunks.push(e.data.data)
     }
 
-    this.recorderSourceNode = source
-    this.recorderWorkletNode = worklet
+    // Store state needed by stopRecording to merge audio into the track
     this.recordingTrackIndex = trackIndex
     this.recordingLatencySeconds = recordLatencySeconds
     this.punchInOffset = this.playbackOffset
@@ -477,6 +524,7 @@ export class AudioEngine {
     this.position = Math.round(this.punchInOffset * 10) / 10
     this.playState = "recording"
 
+    // Play other tracks for overdub monitoring, start meters and position timer
     this.playOtherTracksForMonitoring(trackIndex, this.punchInOffset)
     this.startMeters()
 
@@ -490,17 +538,18 @@ export class AudioEngine {
     }, 1000)
   }
 
-  /** Tears down the recording chain, merges captured audio into the track buffer with latency compensation. */
+  /** Stops recording and merges captured audio. Keeps mic monitoring alive. */
   private stopRecording(): void {
     const selectedTrackIndex = this.recordingTrackIndex ?? -1
     const recordLatencySeconds = this.recordingLatencySeconds
     this.recordingTrackIndex = null
 
     const ctx = this.audioContext
-    const worklet = this.recorderWorkletNode
-    const source = this.recorderSourceNode
-    this.recorderWorkletNode = null
-    this.recorderSourceNode = null
+
+    // Stop PCM collection (but keep worklet connected for pass-through monitoring)
+    if (this.recorderWorkletNode) {
+      this.recorderWorkletNode.port.onmessage = null
+    }
 
     // Stop all tracks from playing
     if (ctx && this.activePlaybackSources.length > 0) {
@@ -511,26 +560,11 @@ export class AudioEngine {
     // TODO: at the moment it doesnt have granularity we need (1s) but we are doing that later
     this.playbackOffset = this.position
 
-    // Tear down input processing chain
-    this.inputGainNode?.disconnect()
-    for (const node of this.inputFxNodes) node.disconnect()
-    this.inputFxNodes = []
-    this.recVolNode?.disconnect()
-    this.inputGainNode = null
-    this.trimGainNode = null
-    this.waveShaperNode = null
-    this.recVolNode = null
-
-    if (source) source.disconnect()
-    if (worklet) worklet.port.onmessage = null
-    worklet?.disconnect()
-    if (source?.mediaStream)
-      source.mediaStream.getTracks().forEach((t) => t.stop())
-
     this.stopAllPlayback()
     this.clearTimer()
     this.stopMeters()
 
+    // Merge recorded audio into the track buffer with latency compensation
     const trimSamples = Math.max(
       0,
       Math.round(
@@ -564,7 +598,6 @@ export class AudioEngine {
 
     this.recordedChunks = []
     this.playState = "stopped"
-    this.micStatus = "inactive"
   }
 
   /** Updates the latencyInfo reactive state with a human-readable breakdown. */
@@ -658,22 +691,7 @@ export class AudioEngine {
     this.stopAllPlayback()
     this.clearTimer()
     this.stopMeters()
-
-    if (this.recorderWorkletNode) {
-      this.recorderWorkletNode.disconnect()
-      this.recorderWorkletNode = null
-    }
-    if (this.recorderSourceNode) {
-      this.recorderSourceNode.mediaStream.getTracks().forEach((t) => t.stop())
-      this.recorderSourceNode.disconnect()
-      this.recorderSourceNode = null
-    }
-
-    this.inputGainNode?.disconnect()
-    this.trimGainNode = null
-    this.waveShaperNode = null
-    this.recVolNode?.disconnect()
-    this.inputFxNodes = []
+    this.stopMonitoring()
 
     for (const track of this.tracks) {
       track.gainNode?.disconnect()

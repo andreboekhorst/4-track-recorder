@@ -36,6 +36,7 @@
 
   function reset() {
     engine.stop()
+    engine.stopMonitoring()
     speed = 0
 
     Object.entries(btns).forEach(([type, btn]) => {
@@ -59,6 +60,9 @@
         btns.pause.pressed = isPaused
         if (isPaused) {
           engine.stop()
+          if (btns.record.pressed) {
+            engine.startMonitoring(selectedTrack)
+          }
         } else {
           if (btns.record.pressed) {
             engine.record(selectedTrack)
@@ -71,8 +75,11 @@
         reset()
         btns.record.pressed = true
         btns.play.pressed = true
-        engine.stop()
-        if (!isPaused) engine.record(selectedTrack)
+        if (isPaused) {
+          engine.startMonitoring(selectedTrack)
+        } else {
+          engine.record(selectedTrack)
+        }
         break
       case "rew":
         reset()
