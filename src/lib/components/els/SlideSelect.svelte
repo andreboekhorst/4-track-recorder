@@ -16,7 +16,7 @@
   ]
   let btnHeight = 0.55
 
-  let { value = $bindable(), padding = 2 } = $props() // padding: % inset top/bottom
+  let { value = $bindable(), padding = 2, disabled = false } = $props() // padding: % inset top/bottom
 
   const steps = selections.length - 1
   const adjusted_scrollarea = 1 - btnHeight - (2 * padding) / 100
@@ -25,6 +25,7 @@
   )
 
   const start = (event) => {
+    if (disabled) return
     dragging = true
     startY = event.clientY
     startIndex = selected_i
@@ -65,6 +66,7 @@
     <div
       class="thumb"
       class:dragging
+      class:disabled
       onpointerdown={start}
       style="top: {xpos_percentage}%;  height: {btnHeight * 100}%"
     ></div>
@@ -135,5 +137,8 @@
   }
   .thumb.dragging {
     cursor: grabbing;
+  }
+  .thumb.disabled {
+    cursor: not-allowed;
   }
 </style>

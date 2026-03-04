@@ -14,6 +14,7 @@
   let selectedTrack = $state(-1)
   let fileInput = $state<HTMLInputElement>(undefined!)
   let speed = $state(0)
+  let recordEngaged = $state(false)
 
   onMount(() => {
     engine = new AudioEngine({
@@ -127,7 +128,7 @@
         </div>
 
         <div class="cell-center" style="grid-area: 5 / 6 / 7 / 7">
-          <SlideSelect bind:value={selectedTrack} />
+          <SlideSelect bind:value={selectedTrack} disabled={recordEngaged} />
         </div>
 
         <div
@@ -216,7 +217,7 @@
         </div>
 
         <div class="cell-bottom" style="grid-area: 6 / 9 / 9 / 12">
-          <TransportButtons {engine} {selectedTrack} bind:speed />
+          <TransportButtons {engine} {selectedTrack} bind:speed bind:recordEngaged />
         </div>
       </div>
     </div>

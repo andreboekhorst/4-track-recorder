@@ -6,7 +6,8 @@
     engine,
     selectedTrack,
     speed = $bindable(0),
-  }: { engine: AudioEngine; selectedTrack: number; speed: number } = $props()
+    recordEngaged = $bindable(false),
+  }: { engine: AudioEngine; selectedTrack: number; speed: number; recordEngaged: boolean } = $props()
 
   let btns = $state({
     record: { pressed: false },
@@ -38,6 +39,7 @@
     engine.stop()
     engine.stopMonitoring()
     speed = 0
+    recordEngaged = false
 
     Object.entries(btns).forEach(([type, btn]) => {
       if (type == "pause") return
@@ -75,6 +77,7 @@
         reset()
         btns.record.pressed = true
         btns.play.pressed = true
+        recordEngaged = true
         if (isPaused) {
           engine.startMonitoring(selectedTrack)
         } else {
