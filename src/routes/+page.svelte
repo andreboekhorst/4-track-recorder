@@ -86,7 +86,29 @@
       />
     </div>
   {/snippet}
-
+  <header>
+    <div class="file-controls">
+      <button onclick={handleSave} disabled={!engine.hasContent}>Save</button>
+      <button onclick={handleLoad}>Load</button>
+      <input
+        type="file"
+        accept=".4trk"
+        bind:this={fileInput}
+        onchange={handleFileChange}
+        hidden
+      />
+      <!-- Place this tag where you want the button to render. -->
+      <a
+        class="github-button"
+        href="https://github.com/andreboekhorst/4track.cc"
+        data-color-scheme="no-preference: dark; light: light; dark: dark;"
+        data-icon="octicon-star"
+        data-size="large"
+        data-show-count="true"
+        aria-label="Star andreboekhorst/4track.cc on GitHub">Star</a
+      >
+    </div>
+  </header>
   <div class="frame">
     <div class="app">
       <div class="parent">
@@ -217,32 +239,15 @@
         </div>
 
         <div class="cell-bottom" style="grid-area: 6 / 9 / 9 / 12">
-          <TransportButtons {engine} {selectedTrack} bind:speed bind:recordEngaged />
+          <TransportButtons
+            {engine}
+            {selectedTrack}
+            bind:speed
+            bind:recordEngaged
+          />
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="file-controls">
-    <button onclick={handleSave} disabled={!engine.hasContent}>Save</button>
-    <button onclick={handleLoad}>Load</button>
-    <input
-      type="file"
-      accept=".4trk"
-      bind:this={fileInput}
-      onchange={handleFileChange}
-      hidden
-    />
-    <!-- Place this tag where you want the button to render. -->
-    <a
-      class="github-button"
-      href="https://github.com/andreboekhorst/4track.cc"
-      data-color-scheme="no-preference: dark; light: light; dark: dark;"
-      data-icon="octicon-star"
-      data-size="large"
-      data-show-count="true"
-      aria-label="Star andreboekhorst/4track.cc on GitHub">Star</a
-    >
   </div>
 {/if}
 
@@ -278,7 +283,7 @@
     min-width: 960px;
     min-height: 576px;
     user-select: none;
-    box-shadow: 0px 0px 70px 10px rgba(29, 30, 33, 0.465);
+    /* box-shadow: 0px 0px 70px 10px rgba(29, 30, 33, 0.465); */
   }
 
   .app {
