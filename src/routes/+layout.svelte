@@ -56,7 +56,7 @@
     display: flex;
     justify-content: right;
     padding: 20px;
-    display: none;
+    position: absolute;
   }
 
   :global(.cell-center) {

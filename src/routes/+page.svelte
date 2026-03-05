@@ -131,15 +131,14 @@
   {/snippet}
   <header>
     <div class="file-controls">
-      <!-- <input type="text" bind:value={uploadFile} />
+      <!-- <input type="text" bind:value={uploadFile} /> -->
       <button
         onclick={() => {
-          handleUrlLoad(uploadFile)
-        }}>Upload</button
+          handleUrlLoad(
+            "https://s3.eu-north-1.amazonaws.com/4track.cc/track_insync.4trk",
+          )
+        }}>Load Demo</button
       >
-      {#if loadProgress > 0}
-        {loadProgress}%
-      {/if}
 
       <button onclick={handleSave} disabled={!engine.hasContent}>Save</button>
       <button onclick={handleLoad}>Load</button>
@@ -149,7 +148,11 @@
         bind:this={fileInput}
         onchange={handleFileChange}
         hidden
-      /> -->
+      />
+
+      {#if loadProgress > 0}
+        ({loadProgress}%)
+      {/if}
 
       <!-- <a
         class="github-button"
