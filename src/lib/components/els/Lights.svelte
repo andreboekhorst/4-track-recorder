@@ -41,7 +41,7 @@
     }
   }
   .lights {
-    height: 70cqh;
+    height: 130cqw;
     width: 50cqw;
     background: #46474a;
     box-shadow:
@@ -49,13 +49,13 @@
       inset 4cqw -4cqw 4cqw rgba(255, 255, 255, 0.5);
     position: relative;
     border-radius: 40cqw;
-    transform: rotate(-60deg) translate(20cqw, 12.5cqh);
+    transform: rotate(-60deg) translate(10cqw, 10cqh);
   }
   .inner {
     position: relative;
-    top: 2.5cqh;
+    top: 3.5cqw;
     left: 4cqw;
-    height: 65cqh;
+    height: 120cqw;
     width: 44cqw;
     background: #46474a;
     border-radius: 40cqw;
@@ -72,10 +72,10 @@
   }
   .light {
     position: absolute;
-    width: 32cqw;
-    height: 32cqw;
-    top: 2cqw;
-    left: 2cqw;
+    width: 31cqw;
+    height: 31cqw;
+    top: 3cqw;
+    left: 3cqw;
     border-radius: 50%;
     &.low {
       background: #628615;

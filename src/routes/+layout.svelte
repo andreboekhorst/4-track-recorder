@@ -32,6 +32,7 @@
     overflow: hidden;
     overscroll-behavior: none;
     touch-action: none;
+    height: 100%;
     &:before {
       content: " ";
       position: absolute;

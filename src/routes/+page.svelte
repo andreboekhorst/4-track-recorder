@@ -162,155 +162,162 @@
       > -->
     </div>
   </header>
-  <div class="frame">
-    <div class="app">
-      <div class="parent">
-        <div class="cell-center" style="grid-area: 2 / 2 / 3 / 3">
-          <span class="ui-label">Phones</span>
-        </div>
+  <div class="align">
+    <div class="center">
+      <div class="frame">
+        <div class="app">
+          <div class="parent">
+            <div class="cell-center" style="grid-area: 2 / 2 / 3 / 3">
+              <span class="ui-label">Phones</span>
+            </div>
 
-        <div class="master cell-center" style="grid-area: 2 / 3 / 3 / 4">
-          <div class="phonos-button">
-            <Knob
-              min={0}
-              max={1.5}
-              value={engine.masterVolume}
-              onchange={(vol) => engine.setMasterVolume(vol)}
-              color="green"
-            />
-          </div>
-        </div>
+            <div class="master cell-center" style="grid-area: 2 / 3 / 3 / 4">
+              <div class="phonos-button">
+                <Knob
+                  min={0}
+                  max={1.5}
+                  value={engine.masterVolume}
+                  onchange={(vol) => engine.setMasterVolume(vol)}
+                  color="green"
+                />
+              </div>
+            </div>
 
-        <!-- Mixer: Channel strips -->
-        {#each tracks as track, i}
-          {#if !track.hidden}
-            {@render channelStrip(track, i)}
-          {/if}
-        {/each}
+            <!-- Mixer: Channel strips -->
+            {#each tracks as track, i}
+              {#if !track.hidden}
+                {@render channelStrip(track, i)}
+              {/if}
+            {/each}
 
-        <div class="ui-label cell-center" style="grid-area: 7 / 3 / 8 / 4">
-          Level
-        </div>
-        <div class="ui-label cell-center" style="grid-area: 7 / 4 / 8 / 5">
-          Pan
-        </div>
-        <div class="cell-center" style="grid-area: 8 / 3 / 9 / 5">
-          <span class="output ui-label">└── Output ──┘</span>
-        </div>
+            <div class="ui-label cell-center" style="grid-area: 7 / 3 / 8 / 4">
+              Level
+            </div>
+            <div class="ui-label cell-center" style="grid-area: 7 / 4 / 8 / 5">
+              Pan
+            </div>
+            <div class="cell-center" style="grid-area: 8 / 3 / 9 / 5">
+              <span class="output ui-label">└── Output ──┘</span>
+            </div>
 
-        <div class="cell-center" style="grid-area: 1 / 5 / 9 / 6">
-          <div class="separator"></div>
-        </div>
+            <div class="cell-center" style="grid-area: 1 / 5 / 9 / 6">
+              <div class="separator"></div>
+            </div>
 
-        <div class="cell-center" style="grid-area: 5 / 6 / 7 / 7">
-          <SlideSelect bind:value={selectedTrack} disabled={recordEngaged} />
-        </div>
+            <div class="cell-center" style="grid-area: 5 / 6 / 7 / 7">
+              <SlideSelect
+                bind:value={selectedTrack}
+                disabled={recordEngaged}
+              />
+            </div>
 
-        <div
-          class="ui-label cell-right"
-          style="grid-area: 7 / 6 / 8 / 7; text-align: right"
-        >
-          Track
-        </div>
-
-        <div class="cell-center" style="grid-area: 2 / 6 / 3 / 8">
-          <div class="mic-status">
-            <div class="ui-label">mic status</div>
             <div
-              class="mic-status-light"
-              title="Microphone status: {engine.micStatus}"
+              class="ui-label cell-right"
+              style="grid-area: 7 / 6 / 8 / 7; text-align: right"
             >
-              <Light
-                color={engine.micStatus === "prompt" ||
-                engine.micStatus === "active"
-                  ? "green"
-                  : "red"}
-                active={engine.micStatus === "active"}
-                pulsing={engine.micStatus === "no-device"
-                  ? "fast"
-                  : engine.micStatus === "inactive" ||
-                      engine.micStatus === "active"
-                    ? false
-                    : "slow"}
+              Track
+            </div>
+
+            <div class="cell-center" style="grid-area: 2 / 6 / 3 / 8">
+              <div class="mic-status">
+                <div class="ui-label">mic status</div>
+                <div
+                  class="mic-status-light"
+                  title="Microphone status: {engine.micStatus}"
+                >
+                  <Light
+                    color={engine.micStatus === "prompt" ||
+                    engine.micStatus === "active"
+                      ? "green"
+                      : "red"}
+                    active={engine.micStatus === "active"}
+                    pulsing={engine.micStatus === "no-device"
+                      ? "fast"
+                      : engine.micStatus === "inactive" ||
+                          engine.micStatus === "active"
+                        ? false
+                        : "slow"}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Input Controls -->
+            <div class="cell-center" style="grid-area: 3 / 6 / 4 / 8">
+              <Knob
+                min={-1}
+                max={1}
+                bind:value={engine.trimValue}
+                onchange={(trim) => engine.setTrim(trim)}
+                label="TRIM"
+                labelLeft="LINE"
+                labelRight="MIC"
+                color="red"
+              />
+            </div>
+
+            <div class="cell-center" style="grid-area: 4 / 7 / 7 / 8">
+              <Slider
+                min={0}
+                max={1.5}
+                bind:value={engine.recordingVolume}
+                onchange={(vol) => engine.setRecordingVolume(vol)}
+              />
+            </div>
+
+            <div class="ui-label cell-center" style="grid-area: 7 / 7 / 8 / 8">
+              Volume
+            </div>
+
+            <div class="ui-label cell-center" style="grid-area: 8 / 6 / 9 / 8">
+              └─ Input ─┘
+            </div>
+
+            <div class="cell-center" style="grid-area: 1 / 8 / 9 / 9">
+              <div class="separator"></div>
+            </div>
+
+            <div class="cell-center" style="grid-area: 2 / 9 / 3 / 10">
+              <div class="mic-status">
+                <div class="ui-label">power</div>
+                <div class="mic-status-light" title="Cassette status: xx">
+                  <Light
+                    color={loadError ? "red" : "green"}
+                    active={true}
+                    pulsing={loadError ? "fast" : false}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="cell-timestamp" style="grid-area: 2 / 10 / 3 / 11">
+              <Timestamp timestamp={engine.position} />
+            </div>
+
+            <div class="logos" style="grid-area: 2 / 11 / 3 / 12">
+              <div class="logo"></div>
+              <div class="logo-tag"></div>
+            </div>
+
+            <div style="grid-area: 3 / 9 / 6 / 13">
+              <Cassette
+                {speed}
+                time={engine.position}
+                max={engine.duration || 180}
+                onchange={(ts) => engine.seek(ts)}
+                isRecording={engine.playState === "recording"}
+              />
+            </div>
+
+            <div class="cell-bottom" style="grid-area: 6 / 9 / 9 / 12">
+              <TransportButtons
+                {engine}
+                {selectedTrack}
+                bind:speed
+                bind:recordEngaged
               />
             </div>
           </div>
-        </div>
-
-        <!-- Input Controls -->
-        <div class="cell-center" style="grid-area: 3 / 6 / 4 / 8">
-          <Knob
-            min={-1}
-            max={1}
-            bind:value={engine.trimValue}
-            onchange={(trim) => engine.setTrim(trim)}
-            label="TRIM"
-            labelLeft="LINE"
-            labelRight="MIC"
-            color="red"
-          />
-        </div>
-
-        <div class="cell-center" style="grid-area: 4 / 7 / 7 / 8">
-          <Slider
-            min={0}
-            max={1.5}
-            bind:value={engine.recordingVolume}
-            onchange={(vol) => engine.setRecordingVolume(vol)}
-          />
-        </div>
-
-        <div class="ui-label cell-center" style="grid-area: 7 / 7 / 8 / 8">
-          Volume
-        </div>
-
-        <div class="ui-label cell-center" style="grid-area: 8 / 6 / 9 / 8">
-          └─ Input ─┘
-        </div>
-
-        <div class="cell-center" style="grid-area: 1 / 8 / 9 / 9">
-          <div class="separator"></div>
-        </div>
-
-        <div class="cell-center" style="grid-area: 2 / 9 / 3 / 10">
-          <div class="mic-status">
-            <div class="ui-label">power</div>
-            <div class="mic-status-light" title="Cassette status: xx">
-              <Light
-                color={loadError ? "red" : "green"}
-                active={true}
-                pulsing={loadError ? "fast" : false}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div class="cell-timestamp" style="grid-area: 2 / 10 / 3 / 11">
-          <Timestamp timestamp={engine.position} />
-        </div>
-
-        <div class="logos" style="grid-area: 2 / 11 / 3 / 12">
-          <div class="logo"></div>
-          <div class="logo-tag"></div>
-        </div>
-
-        <div style="grid-area: 3 / 9 / 6 / 13">
-          <Cassette
-            {speed}
-            time={engine.position}
-            max={engine.duration || 180}
-            onchange={(ts) => engine.seek(ts)}
-            isRecording={engine.playState === "recording"}
-          />
-        </div>
-
-        <div class="cell-bottom" style="grid-area: 6 / 9 / 9 / 12">
-          <TransportButtons
-            {engine}
-            {selectedTrack}
-            bind:speed
-            bind:recordEngaged
-          />
         </div>
       </div>
     </div>
@@ -318,9 +325,17 @@
 {/if}
 
 <style>
+  .align {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  .center {
+    flex: 1;
+  }
   .separator {
     height: 100%;
-    width: 20px;
     width: 0.45cqw;
     border-radius: 0 0 0.15cqw 0.15cqw;
     box-shadow:
@@ -338,10 +353,11 @@
   }
 
   .frame {
+    flex: 1;
     container-type: size;
     background: linear-gradient(to bottom, #616161, #3b3b3b);
     padding: 1px;
-    border-radius: 12px 12px 36px 36px;
+    border-radius: 1.2cqw 1.2cqw 3.6cqw 3.6cqw;
     aspect-ratio: 1 / 0.6;
     margin: 0 auto; /* min-width: 960px; */
 
@@ -349,7 +365,6 @@
     max-width: 90vw;
 
     @media (max-width: 1024px) {
-      margin-top: 5vh;
       max-height: 90vh;
       max-width: 95vw;
     }
@@ -367,7 +382,7 @@
       margin: 0 2%;
       background: linear-gradient(to right, #6f7074, #505252);
       top: -8px;
-      border-radius: 10px 10px 0 0;
+      border-radius: 10cqw 10cqw 0 0;
       box-shadow: inset 0cqw 0.3cqh 0.2cqw rgb(225 225 225 / 40%);
       border: 1px solid #686868;
     }
@@ -375,7 +390,7 @@
 
   .app {
     background: radial-gradient(ellipse at top left, #686b71, #383840);
-    border-radius: 10px 10px 32px 36px;
+    border-radius: 1cqw 1cqw 3cqw 3cqw;
     height: 100cqh;
     box-shadow:
       inset 0.2cqw 0.5cqh 0.4cqw rgb(225 225 225 / 50%),
