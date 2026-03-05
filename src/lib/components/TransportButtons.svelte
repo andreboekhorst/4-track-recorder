@@ -7,7 +7,12 @@
     selectedTrack,
     speed = $bindable(0),
     recordEngaged = $bindable(false),
-  }: { engine: AudioEngine; selectedTrack: number; speed: number; recordEngaged: boolean } = $props()
+  }: {
+    engine: AudioEngine
+    selectedTrack: number
+    speed: number
+    recordEngaged: boolean
+  } = $props()
 
   let btns = $state({
     record: { pressed: false },
@@ -100,7 +105,11 @@
 
 <div class="ctrlButtons">
   <div class="rec-light">
-    <Light color="red" active={btns.record.pressed} pulsing={btns.record.pressed && isPaused ? "slow" : false} />
+    <Light
+      color="red"
+      active={btns.record.pressed}
+      pulsing={btns.record.pressed && isPaused ? "slow" : false}
+    />
   </div>
   <div class="btnLabels">
     {#each Object.entries(btns) as [type, btn]}
@@ -126,9 +135,9 @@
 <style>
   .rec-light {
     position: absolute;
-    height: 20px;
-    width: 40px;
-    left: -5px;
+    height: 3cqw;
+    width: 3cqw;
+    left: -2cqw;
     &.active {
       opacity: 1;
     }

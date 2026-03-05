@@ -151,7 +151,7 @@
         hidden
       /> -->
 
-      <a
+      <!-- <a
         class="github-button"
         href="https://github.com/andreboekhorst/4track.cc"
         data-color-scheme="no-preference: dark; light: light; dark: dark;"
@@ -159,7 +159,7 @@
         data-size="large"
         data-show-count="true"
         aria-label="Star andreboekhorst/4track.cc on GitHub">Star</a
-      >
+      > -->
     </div>
   </header>
   <div class="frame">
@@ -331,7 +331,7 @@
   .parent {
     display: grid;
     grid-template-columns: 4cqw 4cqw 10cqw 10cqw 4cqw 4cqw 8cqw 5cqw 10cqw 1fr 1fr 4cqw;
-    grid-template-rows: 5cqh 15cqh 1fr 1fr 1fr 1fr 4cqh 4cqh 6cqh;
+    grid-template-rows: 3cqw 9cqw 1fr 1fr 1fr 1fr 2.4cqw 2.4cqw 4.8cqw;
     grid-column-gap: 0px;
     grid-row-gap: 0px;
     height: 100%;
@@ -341,26 +341,46 @@
     container-type: size;
     background: linear-gradient(to bottom, #616161, #3b3b3b);
     padding: 1px;
-    border-radius: 12px 12px 40px 40px;
+    border-radius: 12px 12px 36px 36px;
     aspect-ratio: 1 / 0.6;
-    max-height: 75vh;
-    max-width: 80vw;
+    margin: 0 auto; /* min-width: 960px; */
 
-    margin: 0 auto;
-    min-width: 960px;
-    min-height: 576px;
+    max-height: 75vh;
+    max-width: 90vw;
+
+    @media (max-width: 1024px) {
+      margin-top: 5vh;
+      max-height: 90vh;
+      max-width: 95vw;
+    }
+
+    /* min-height: 576px; */
     user-select: none;
 
     box-shadow: 30px 20px 30px 0px rgb(33 34 36 / 31%);
+    position: relative;
+    &:before {
+      position: absolute;
+      content: " ";
+      width: 96%;
+      height: 8px;
+      margin: 0 2%;
+      background: linear-gradient(to right, #6f7074, #505252);
+      top: -8px;
+      border-radius: 10px 10px 0 0;
+      box-shadow: inset 0cqw 0.3cqh 0.2cqw rgb(225 225 225 / 40%);
+      border: 1px solid #686868;
+    }
   }
 
   .app {
     background: radial-gradient(ellipse at top left, #686b71, #383840);
-    border-radius: 10px 10px 36px 36px;
+    border-radius: 10px 10px 32px 36px;
     height: 100cqh;
     box-shadow:
       inset 0.2cqw 0.5cqh 0.4cqw rgb(225 225 225 / 50%),
-      inset -0.2cqw -0.5cqh 0.4cqw rgba(21, 21, 21, 0.5);
+      inset -0.2cqw -1.5cqh 0.2cqw rgb(0 0 0 / 26.6%);
+
     position: relative;
   }
 

@@ -1,7 +1,11 @@
 <script lang="ts">
-  let { color = "green", active = false, pulsing = false }: {
-    color?: "red" | "green",
-    active?: boolean,
+  let {
+    color = "green",
+    active = false,
+    pulsing = false,
+  }: {
+    color?: "red" | "green"
+    active?: boolean
     pulsing?: false | "slow" | "fast"
   } = $props()
 </script>
@@ -20,8 +24,8 @@
 <style>
   .light-bevel {
     background: linear-gradient(to bottom right, #101010, #a2a1a1);
-    height: 18px;
-    width: 18px;
+    height: 1.5cqw;
+    width: 1.5cqw;
     border-radius: 50%;
     container-type: size;
   }

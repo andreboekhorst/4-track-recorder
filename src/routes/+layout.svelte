@@ -38,7 +38,7 @@
       display: block;
       width: 100%;
       height: 100%;
-      background: url("/noise_100.jpg");
+      background: url("/noise_50.jpg");
       background-size: 125px;
       mix-blend-mode: multiply;
       opacity: 0.5;
@@ -51,6 +51,7 @@
     display: flex;
     justify-content: right;
     padding: 20px;
+    display: none;
   }
 
   :global(.cell-center) {
