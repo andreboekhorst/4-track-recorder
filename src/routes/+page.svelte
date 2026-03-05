@@ -362,11 +362,11 @@
     margin: 0 auto; /* min-width: 960px; */
 
     max-height: 75dvh;
-    max-width: 90vw;
+    max-width: min(90vw, calc(75dvh / 0.6));
 
     @media (max-width: 1024px) {
       max-height: 90dvh;
-      max-width: 95vw;
+      max-width: min(95vw, calc(90dvh / 0.6));
     }
 
     /* min-height: 576px; */
@@ -399,7 +399,7 @@
     position: relative;
   }
 
-  /* .app:before {
+  .app:before {
     content: " ";
     width: 100%;
     height: 100%;
@@ -410,7 +410,7 @@
     position: absolute;
     opacity: 0.9;
     border-radius: 10px 10px 36px 36px;
-  } */
+  }
 
   .logos {
     display: flex;

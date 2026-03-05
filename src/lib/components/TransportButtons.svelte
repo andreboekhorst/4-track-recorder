@@ -137,7 +137,7 @@
     position: absolute;
     height: 3cqw;
     width: 3cqw;
-    left: -2cqw;
+    left: -0.5cqw;
     &.active {
       opacity: 1;
     }
@@ -153,7 +153,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    container-type: inline-size;
+    /* container-type: size; */
     flex: 1; /* if parent container is flex */
     padding: 0 0 0 2cqw;
     position: relative;
@@ -161,18 +161,19 @@
   .controlBtns {
     background: linear-gradient(to bottom right, #3d3c43, #646468);
     width: 100%;
-    border-radius: 0.9cqw;
+    border-radius: 0.5cqw;
     box-shadow:
       inset 0.45cqw 0.45cqw 1.4cqw rgba(0, 0, 0, 0.6),
-      inset -0.23cqw -0.23cqw 0.45cqw rgba(255, 255, 255, 0.5);
+      inset -0.01cqw -0.1cqw 0.1cqw rgba(255, 255, 255, 0.5);
     display: flex;
     flex-direction: column;
     padding-top: 0.23cqw;
-    padding-right: 0.45cqw;
+    padding-left: 0.15cqw;
+    padding-right: 0.15cqw;
     perspective: 182cqw;
   }
   .imgBtns {
-    padding: 0.7cqw;
+    padding: 0.1cqw;
     border-radius: 0.45cqw;
     background-color: #212121;
     display: flex;
@@ -183,12 +184,12 @@
     div {
       flex: 1;
       text-align: center;
-      padding-bottom: 1.4cqw;
+      padding-bottom: 0.5cqw;
     }
     .record {
       color: rgb(200, 60, 35);
       text-shadow: 0px 0px 2px #0000007d;
-      transform: translateX(-3cqw);
+      transform: translateX(-0.8cqw);
       &:before {
         content: "─ ";
         color: white;
@@ -207,7 +208,7 @@
     background-position: center;
     flex: 1;
     aspect-ratio: 70 / 87;
-    margin-right: 0.45cqw;
+    margin-right: 0.2cqw;
     box-shadow: 3.4cqw 3.4cqw 5cqw rgba(0, 0, 0, 0.6);
     position: relative;
 

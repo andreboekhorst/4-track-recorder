@@ -14,6 +14,8 @@
   :global(*) {
     box-sizing: border-box;
     outline: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
 
   :global(html) {
@@ -33,6 +35,8 @@
     overscroll-behavior: none;
     touch-action: none;
     height: 100%;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right)
+      env(safe-area-inset-bottom) env(safe-area-inset-left);
     &:before {
       content: " ";
       position: absolute;
