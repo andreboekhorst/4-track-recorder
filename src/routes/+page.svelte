@@ -322,7 +322,7 @@
 
       <div class="menu-footer">
         {#if loadProgress > 0}
-          Loading ({loadProgress}%)
+          Loading Demo ({loadProgress}%)
         {:else}
           By <a href="https://www.andreboekhorst.nl" target="_blank"
             >André Boekhorst</a
@@ -486,6 +486,7 @@
     letter-spacing: 1px;
     /* line-height: 20px; */
     display: flex;
+    flex-wrap: wrap;
     gap: 10px;
     justify-content: center;
     margin-top: 4vh;
