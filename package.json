@@ -1,6 +1,7 @@
 {
   "name": "4track",
   "version": "0.1.0",
+  "license": "GPL-3.0-only",
   "type": "module",
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",

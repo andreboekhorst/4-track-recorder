@@ -1,9 +1,0 @@
-{
-  "name": "4Track",
-  "short_name": "4Track",
-  "start_url": "/",
-  "display": "standalone",
-  "orientation": "landscape",
-  "background_color": "#b2b6bc",
-  "theme_color": "#383840"
-}
