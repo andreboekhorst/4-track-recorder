@@ -678,6 +678,7 @@ export class AudioEngine {
     // Stop any in-progress recording or playback
     if (this.playState === "recording") this.stopRecording()
     this.stopAllPlayback()
+    this.playState = "stopped"
     this.stopMonitoring()
 
     // Clear all existing track data before loading
