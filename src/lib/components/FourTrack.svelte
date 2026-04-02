@@ -196,7 +196,7 @@
 
           <div class="cell-center" style="grid-area: 2 / 6 / 3 / 8">
             <div class="mic-status">
-              <div class="ui-label">mic status XXX22</div>
+              <div class="ui-label">mic status</div>
               <div
                 class="mic-status-light"
                 title="Microphone status: {engine.micStatus}"
@@ -256,7 +256,7 @@
           <div class="cell-center" style="grid-area: 2 / 9 / 3 / 10">
             <div class="mic-status">
               <div class="ui-label">power</div>
-              <div class="mic-status-light" title="Cassette status: xx">
+              <div class="mic-status-light" title="Cassette status">
                 <Light color="green" active={true} pulsing={false} />
               </div>
             </div>
