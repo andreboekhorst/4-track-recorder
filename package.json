@@ -1,7 +1,14 @@
 {
-  "name": "4-track-recorder",
+  "name": "4track",
   "version": "0.1.0",
+  "description": "A 4-track cassette recorder component for Svelte 5",
   "license": "GPL-3.0-only",
+  "author": "Andre Boekhorst",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andreboekhorst/4track.cc.git"
+  },
+  "keywords": ["svelte", "audio", "recorder", "cassette", "4-track"],
   "type": "module",
   "svelte": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -12,14 +19,17 @@
       "default": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
     "package": "svelte-package -o dist",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch"
+    "check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
+    "prepublishOnly": "npm run package"
   },
   "peerDependencies": {
     "svelte": "^5.0.0"
