@@ -37,6 +37,7 @@
   let selectedTrack = $state(0)
   let speed = $state(0)
   let recordEngaged = $state(false)
+  let resetTransport: (() => void) | undefined = $state()
 
   async function fetchWithProgress(url: string): Promise<File> {
     const response = await fetch(url)
@@ -83,6 +84,7 @@
         const file =
           typeof source === "string" ? await fetchWithProgress(source) : source
         await engine!.importProject(file)
+        resetTransport?.()
         status = "ready"
       } catch (e) {
         status = "error"
@@ -194,7 +196,7 @@
 
           <div class="cell-center" style="grid-area: 2 / 6 / 3 / 8">
             <div class="mic-status">
-              <div class="ui-label">mic status</div>
+              <div class="ui-label">mic status XXX22</div>
               <div
                 class="mic-status-light"
                 title="Microphone status: {engine.micStatus}"
@@ -285,6 +287,7 @@
               {selectedTrack}
               bind:speed
               bind:recordEngaged
+              bind:resetTransport
             />
           </div>
         </div>

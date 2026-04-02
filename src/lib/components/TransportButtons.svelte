@@ -20,11 +20,13 @@
     selectedTrack,
     speed = $bindable(0),
     recordEngaged = $bindable(false),
+    resetTransport = $bindable<() => void>(),
   }: {
     engine: AudioEngine
     selectedTrack: number
     speed: number
     recordEngaged: boolean
+    resetTransport?: () => void
   } = $props()
 
   let btns = $state({
@@ -73,6 +75,8 @@
       btn.pressed = false
     })
   }
+
+  resetTransport = reset
 
   function clicky(btnType: string) {
     switch (btnType) {

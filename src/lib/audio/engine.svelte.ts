@@ -675,22 +675,6 @@ export class AudioEngine {
 
   /** Loads a .4trk file, restoring all track buffers, mixer settings, and master volume. */
   async importProject(file: File | Blob): Promise<void> {
-    // Stop any in-progress recording or playback
-    if (this.playState === "recording") this.stopRecording()
-    this.stopAllPlayback()
-    this.playState = "stopped"
-    this.stopMonitoring()
-
-    // Clear all existing track data before loading
-    for (const track of this.tracks) {
-      if (!track.hidden) {
-        track.buffer = null
-        track.hasContent = false
-        track.trimStart = 0
-        track.level = 0
-      }
-    }
-
     const { masterVolume } = await _importProject(file, this.tracks, () =>
       this.ensureContext(),
     )
