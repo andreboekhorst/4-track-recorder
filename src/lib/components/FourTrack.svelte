@@ -1,7 +1,7 @@
 <script lang="ts">
   import { AudioEngine } from "$lib/audio/engine.svelte.js"
   import type { HiddenTrackConfig, LoadStatus } from "$lib/types.js"
-  import casetteHissUrl from "../assets/casette_hiss.mp3"
+  import casetteHissUrl from "../assets/casette_hiss_compressed.mp3"
   import noiseImg from "../assets/noise_50.jpg"
   import logoImg from "../assets/logo.svg?url"
   import openstudioImg from "../assets/openstudio.svg?url"
@@ -26,7 +26,7 @@
   }: {
     hiddenTracks?: HiddenTrackConfig[]
     onready?: (detail: { engine: AudioEngine }) => void
-    save?: () => Blob
+    save?: () => Promise<Blob>
     load?: (source: File | string) => Promise<void>
     initialProject?: string | File
     status?: LoadStatus
@@ -108,13 +108,16 @@
 
   {#snippet channelStrip(track, i)}
     <div
-      class="channel-lights cell-center"
+      class="track{i} channel-lights cell-center"
       style="grid-area: {i + 3} / 2 / {i + 4} / 3"
     >
       <Lights level={track.level} />
     </div>
 
-    <div class="cell-center" style="grid-area: {i + 3} / 3 / {i + 4} / 4">
+    <div
+      class="track{i} volume cell-center"
+      style="grid-area: {i + 3} / 3 / {i + 4} / 4"
+    >
       <Knob
         min={0}
         max={1.5}
@@ -123,7 +126,10 @@
       />
     </div>
 
-    <div class="cell-center" style="grid-area: {i + 3} / 4 / {i + 4} / 5">
+    <div
+      class="track{i} panning cell-center"
+      style="grid-area: {i + 3} / 4 / {i + 4} / 5"
+    >
       <Knob
         min={-1}
         max={1}
@@ -232,7 +238,10 @@
             />
           </div>
 
-          <div class="cell-center" style="grid-area: 4 / 7 / 7 / 8">
+          <div
+            class="cell-center input-volume"
+            style="grid-area: 4 / 7 / 7 / 8"
+          >
             <Slider
               min={0}
               max={1.5}

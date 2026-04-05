@@ -1,19 +1,19 @@
 // Default configuration and constraints for the audio engine.
 
-import type { AudioEngineConfig } from '../types.js';
-import workletUrl from '../assets/recorder-worklet.js?url';
+import type { AudioEngineConfig } from "../types.js"
+import workletUrl from "../assets/recorder-worklet.js?url"
 
-export const PLAYBACK_TICK_MS = 50;
+export const PLAYBACK_TICK_MS = 50
 
 export const DEFAULT_CONFIG: AudioEngineConfig = {
-  sampleRate: 48000, // 44100 | 48000 | 96000
+  sampleRate: 32000, // 44100 | 48000 | 96000
   bitDepth: 16, // 8 = lo-fi, 16 = CD quality, 32 = float (uncompressed)
   maxSeconds: 180, // max recording length per track (seconds)
   trackCount: 4, // number of mixer tracks
   workletUrl,
   inputFx: [
     {
-      type: 'trim',
+      type: "trim",
       enabled: true,
       default: -1, // initial slider position: -1 (clean) → 1 (full saturation)
       gainMin: 0.2, // gain at slider -1; lower = quieter clean tone (0.1–1.0)
@@ -22,11 +22,11 @@ export const DEFAULT_CONFIG: AudioEngineConfig = {
       curveRange: 8, // extra curvature at full trim; higher = more aggressive distortion (2–20)
     },
   ],
-};
+}
 
 export const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
   echoCancellation: false,
   noiseSuppression: false,
   autoGainControl: false,
   latency: { ideal: 0 },
-} as MediaTrackConstraints;
+} as MediaTrackConstraints

@@ -6,11 +6,11 @@ import { Track } from './track.svelte.js';
 import type { AudioEngineConfig, ProjectMetadata, TrackMeta } from '../types.js';
 import { quantizePCM, dequantizePCM } from './pcm.js';
 
-export function exportProject(
+export async function exportProject(
   tracks: Track[],
   config: AudioEngineConfig,
   masterVolume: number,
-): Blob {
+): Promise<Blob> {
   const trackMeta: TrackMeta[] = [];
   const pcmParts: ArrayBuffer[] = [];
 
@@ -50,7 +50,9 @@ export function exportProject(
   const metaBytes = encoder.encode(JSON.stringify(metadata));
   const metaLength = new Uint32Array([metaBytes.length]);
 
-  return new Blob([metaLength, metaBytes, ...pcmParts], { type: 'application/octet-stream' });
+  const raw = new Blob([metaLength, metaBytes, ...pcmParts]);
+  const compressed = raw.stream().pipeThrough(new CompressionStream('gzip'));
+  return new Response(compressed).blob();
 }
 
 export async function importProject(
@@ -58,7 +60,8 @@ export async function importProject(
   tracks: Track[],
   ensureContext: () => AudioContext,
 ): Promise<{ masterVolume: number }> {
-  const arrayBuffer = await file.arrayBuffer();
+  const decompressed = new Blob([file]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const arrayBuffer = await new Response(decompressed).arrayBuffer();
   const view = new DataView(arrayBuffer);
 
   const metaLength = view.getUint32(0, true);

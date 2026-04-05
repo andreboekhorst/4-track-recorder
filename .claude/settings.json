@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ffprobe -i /Users/andreboekhorst/Repositories/4-track-recorder/src/lib/assets/casette_hiss.mp3 -show_entries format=duration,bit_rate -v quiet -of csv=\"p=0\")",
+      "Bash(ffprobe -i /Users/andreboekhorst/Repositories/4-track-recorder/src/lib/assets/casette_hiss_compressed.mp3 -show_entries format=duration,bit_rate -v quiet -of csv=\"p=0\")",
+      "Bash(ffmpeg -i src/lib/assets/casette_hiss.mp3 -t 180 -c copy src/lib/assets/casette_hiss_trimmed.mp3 -y)",
+      "Bash(ffmpeg -i src/lib/assets/casette_hiss_compressed.mp3 -t 180 -c copy src/lib/assets/casette_hiss_compressed_trimmed.mp3 -y)"
+    ]
+  }
+}

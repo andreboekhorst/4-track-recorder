@@ -668,8 +668,8 @@ export class AudioEngine {
 
   // ─── Save / Load ────────────────────────────────────────────────────
 
-  /** Serializes all tracks and settings into a .4trk binary blob. */
-  exportProject(): Blob {
+  /** Serializes all tracks and settings into a compressed .4trk binary blob. */
+  exportProject(): Promise<Blob> {
     return _exportProject(this.tracks, this.config, this.masterVolume)
   }
 
