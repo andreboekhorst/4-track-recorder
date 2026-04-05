@@ -4,6 +4,10 @@ A browser-based 4-track audio recorder built with the Web Audio API and SvelteKi
 
 ![4-Track Recorder](img/4track.png)
 
+## Give it a try
+
+You can try out the 4 track recorder on [4track.cc](https://www.4track.cc)
+
 ## Installation
 
 ```bash
