@@ -31,3 +31,5 @@ vite.config.ts.timestamp-*
 .claude
 .claude/*
 /.claude
+.claude
+.vscode
