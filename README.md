@@ -2,6 +2,8 @@
 
 A browser-based 4-track audio recorder built with the Web Audio API and SvelteKit. Designed for low-latency recording with overdub support, latency compensation, and sample-accurate multi-track playback — all running entirely client-side with no server required.
 
+![4-Track Recorder](img/4track.png)
+
 ## Installation
 
 ```bash
@@ -12,7 +14,7 @@ npm install 4-track-recorder
 
 ```svelte
 <script>
-  import { FourTrack } from '4-track-recorder'
+  import { FourTrack } from "4-track-recorder"
 </script>
 
 <FourTrack />
@@ -28,7 +30,7 @@ Use `bind:save` and `bind:load` to get functions you can call from your own UI:
 
 ```svelte
 <script>
-  import { FourTrack } from '4-track-recorder'
+  import { FourTrack } from "4-track-recorder"
 
   let save
   let load
@@ -37,9 +39,9 @@ Use `bind:save` and `bind:load` to get functions you can call from your own UI:
     const blob = save()
     // Download as file
     const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
+    const a = document.createElement("a")
     a.href = url
-    a.download = 'my-song.4trk'
+    a.download = "my-song.4trk"
     a.click()
     URL.revokeObjectURL(url)
   }
@@ -51,7 +53,7 @@ Use `bind:save` and `bind:load` to get functions you can call from your own UI:
 
   // Or load directly from a URL
   function loadFromUrl() {
-    load('https://example.com/songs/demo.4trk')
+    load("https://example.com/songs/demo.4trk")
   }
 </script>
 
@@ -71,10 +73,10 @@ Pass a URL or `File` to `initialProject` to auto-load a project when the compone
 
 ## Props
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `hiddenTracks` | `HiddenTrackConfig[]` | Background audio tracks (e.g. cassette hiss) |
-| `onready` | `(detail: { engine: AudioEngine }) => void` | Callback when the engine is initialized |
-| `save` | `() => Blob` (bindable) | Bind to get a function that exports the project as a `.4trk` blob |
-| `load` | `(source: File \| string) => Promise<void>` (bindable) | Bind to get a function that imports a `.4trk` file or URL |
-| `initialProject` | `string \| File` | URL or File to auto-load on mount |
+| Prop             | Type                                                   | Description                                                       |
+| ---------------- | ------------------------------------------------------ | ----------------------------------------------------------------- |
+| `hiddenTracks`   | `HiddenTrackConfig[]`                                  | Background audio tracks (e.g. cassette hiss)                      |
+| `onready`        | `(detail: { engine: AudioEngine }) => void`            | Callback when the engine is initialized                           |
+| `save`           | `() => Blob` (bindable)                                | Bind to get a function that exports the project as a `.4trk` blob |
+| `load`           | `(source: File \| string) => Promise<void>` (bindable) | Bind to get a function that imports a `.4trk` file or URL         |
+| `initialProject` | `string \| File`                                       | URL or File to auto-load on mount                                 |
