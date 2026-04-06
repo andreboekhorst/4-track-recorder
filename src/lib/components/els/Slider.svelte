@@ -2,10 +2,17 @@
 <!-- svelte-ignore a11y_interactive_supports_focus -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <script>
-  import sliderIndicatorImg from '../../assets/slider-indicator.svg?url'
-  import sliderImg from '../../assets/slider.png'
+  import sliderIndicatorImg from "../../assets/slider-indicator.svg?url"
+  import sliderImg from "../../assets/slider.png"
 
-  let { value = $bindable(0), min = 0, max = 1, onchange, btnHeight = 0.35, padding = 1 } = $props()
+  let {
+    value = $bindable(0),
+    min = 0,
+    max = 1,
+    onchange,
+    btnHeight = 0.35,
+    padding = 1,
+  } = $props()
   let dragging = $state(false)
   let trackEl = $state()
   let startY = $state(0)
@@ -20,7 +27,8 @@
 
   // Inverted: top = max, bottom = min (like a real fader)
   let topPercent = $derived(
-    padding + ((1 - normalizeValue(value)) * (1 - btnHeight - (2 * padding) / 100) * 100),
+    padding +
+      (1 - normalizeValue(value)) * (1 - btnHeight - (2 * padding) / 100) * 100,
   )
 
   const start = (event) => {
@@ -48,7 +56,11 @@
   }
 </script>
 
-<div class="slider-holder" style:--bg-slider-indicator="url({sliderIndicatorImg})" style:--bg-slider="url({sliderImg})">
+<div
+  class="slider-holder"
+  style:--bg-slider-indicator="url({sliderIndicatorImg})"
+  style:--bg-slider="url({sliderImg})"
+>
   <div
     class="slider-indicator"
     style="height: {(1 - btnHeight) * 100}%; top: {(btnHeight / 2) * 100}%"
@@ -99,6 +111,7 @@
     height: 100%;
     position: relative;
     border-radius: 8cqw;
+    touch-action: none;
     box-shadow:
       inset 9cqw 2cqh 15cqw rgba(31, 31, 31, 0.75),
       inset 1.5cqw 0.2cqh 1.5cqw rgba(31, 31, 31, 0.45),
@@ -129,6 +142,7 @@
     cursor: grab;
     z-index: 1;
     border-radius: 10cqw;
+    touch-action: none
     box-shadow:
       15cqw 1cqh 8cqw rgba(0, 0, 0, 0.4),
       inset 1.5cqw 0.5cqh 1cqw rgba(255, 252, 252, 0.35);
