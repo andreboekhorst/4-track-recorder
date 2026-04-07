@@ -134,6 +134,7 @@
     justify-content: center;
     position: relative;
     margin-bottom: -5cqw;
+    touch-action: none;
 
     &:before {
       content: " ";
@@ -176,6 +177,7 @@
     justify-content: center;
     align-items: center;
     position: absolute;
+    touch-action: none;
 
     .layer1 {
       position: absolute;

@@ -98,6 +98,8 @@
     padding: 1.5cqw 8cqw;
     position: relative;
     cursor: ew-resize;
+    touch-action: none;
+
     box-shadow:
       inset 0.2cqw 0.2cqw 0.2cqw 0 rgba(0, 0, 0, 0.5),
       inset -0.1cqw -0.1cqw 0.2cqw 0 rgba(255, 255, 255, 0.5);
