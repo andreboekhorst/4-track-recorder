@@ -60,11 +60,11 @@
         <div class="rotaters">
           <div
             class="rotater rot1"
-            style:transform={"rotate(" + (time * 270) / 10 + "deg)"}
+            style:transform={"rotate(" + (time * 270 * -1) / 10 + "deg)"}
           ></div>
           <div
             class="rotater rot2"
-            style:transform={"rotate(" + (time * 180) / 10 + "deg)"}
+            style:transform={"rotate(" + (time * 140 * -1) / 10 + "deg)"}
           ></div>
         </div>
       </div>
