@@ -4,20 +4,21 @@
 <script lang="ts">
   let { timestamp } = $props()
   import { playFx } from "$lib/fx/soundfx"
+  import { Tween } from "svelte/motion"
   import DigitRoller from "./DigitRoller.svelte"
   import counterBgImg from "../../assets/counter_bg.png"
 
-  let correction = $state(0)
+  const correction = new Tween(0)
 
   let corrected = $derived.by(() => {
-    let v = timestamp - correction
+    let v = timestamp - correction.current
     if (v < 0) v += 1000
     return v % 1000
   })
 
   function reset() {
     playFx("counter")
-    correction = timestamp
+    correction.set(timestamp, { duration: 400 })
   }
 </script>
 
