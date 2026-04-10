@@ -3,7 +3,7 @@
 import type { AudioEngineConfig } from "../types.js"
 import workletUrl from "../assets/recorder-worklet.js?url"
 
-export const PLAYBACK_TICK_MS = 50
+export const PLAYBACK_TICK_MS = 32 // 30 fps
 
 export const DEFAULT_CONFIG: AudioEngineConfig = {
   sampleRate: 32000, // 44100 | 48000 | 96000

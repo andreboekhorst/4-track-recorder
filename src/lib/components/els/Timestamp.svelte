@@ -5,25 +5,15 @@
   let { timestamp } = $props()
   import { playFx } from "$lib/fx/soundfx"
   import DigitRoller from "./DigitRoller.svelte"
-  import counterBgImg from '../../assets/counter_bg.png'
+  import counterBgImg from "../../assets/counter_bg.png"
 
   let correction = $state(0)
-  function count_to_str(nr: number) {
-    var cor_nr = Math.floor(nr - correction)
-    if (cor_nr < 0) cor_nr += 1000
 
-    if (cor_nr > 99) {
-      return cor_nr.toString()
-    } else if (cor_nr > 9) {
-      return "0" + cor_nr.toString()
-    } else {
-      return "00" + cor_nr.toString()
-    }
-  }
-
-  function get_digit(nr, i) {
-    return count_to_str(nr).charAt(i)
-  }
+  let corrected = $derived.by(() => {
+    let v = timestamp - correction
+    if (v < 0) v += 1000
+    return v % 1000
+  })
 
   function reset() {
     playFx("counter")
@@ -37,9 +27,9 @@
   <div class="counter">
     <a onmousedown={() => reset()}>&nbsp;</a>
     <div class="number-ticker">
-      <DigitRoller digit={get_digit(timestamp, 0)} />
-      <DigitRoller digit={get_digit(timestamp, 1)} />
-      <DigitRoller digit={get_digit(timestamp, 2)} />
+      <DigitRoller timestamp={corrected} index={0} />
+      <DigitRoller timestamp={corrected} index={1} />
+      <DigitRoller timestamp={corrected} index={2} />
     </div>
   </div>
 </div>

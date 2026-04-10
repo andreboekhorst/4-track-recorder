@@ -43,8 +43,9 @@
   $effect(() => {
     let timer: ReturnType<typeof setInterval> | undefined
 
-    // Trigger stop when rewinding and reaching the end
+    // Trigger stop when rewinding and reaching the beginning
     if (speed < 0 && engine.position + speed / 50 <= 0) {
+      engine.seek(0)
       clicky("stop")
     }
     if (engine.position + speed / 50 > engine.duration) {

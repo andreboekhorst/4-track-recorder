@@ -30,6 +30,11 @@ export class AudioEngine {
 
   tracks: Track[]
 
+  /** Rounds a time value to 2 decimal places for position display. */
+  private roundPosition(seconds: number): number {
+    return Math.round(seconds * 100) / 100
+  }
+
   // ─── Private state ──────────────────────────────────────────────────
 
   private config: AudioEngineConfig
@@ -208,7 +213,7 @@ export class AudioEngine {
     const max = this.getMaxDuration()
     const clamped = Math.max(0, Math.min(seconds, max))
     this.playbackOffset = clamped
-    this.position = Math.round(clamped * 10) / 10
+    this.position = this.roundPosition(clamped)
     if (this.playState === "playing") {
       this.stopSources(this.activePlaybackSources)
       this.clearPlaybackTick()
@@ -256,15 +261,15 @@ export class AudioEngine {
 
     this.playbackStartTime = startTime
     this.playbackOffset = offsetSeconds
-    this.position = Math.round(offsetSeconds * 10) / 10
+    this.position = this.roundPosition(offsetSeconds)
     this.playState = "playing"
 
     this.playbackTickId = window.setInterval(() => {
       const elapsed = ctx.currentTime - this.playbackStartTime
-      this.position = Math.round((this.playbackOffset + elapsed) * 10) / 10
+      this.position = this.roundPosition(this.playbackOffset + elapsed)
       if (elapsed >= effectiveDuration) {
         this.playbackOffset = maxDuration
-        this.position = Math.round(maxDuration * 10) / 10
+        this.position = this.roundPosition(maxDuration)
         this.clearPlaybackTick()
         this.playState = "stopped"
       }
@@ -283,7 +288,7 @@ export class AudioEngine {
       this.stopSources(this.activePlaybackSources)
     }
     this.clearPlaybackTick()
-    this.position = Math.round(this.playbackOffset * 10) / 10
+    this.position = this.roundPosition(this.playbackOffset)
     this.playState = "paused"
   }
 
@@ -303,7 +308,7 @@ export class AudioEngine {
         this.stopSources(this.activePlaybackSources)
       }
       this.clearPlaybackTick()
-      this.position = Math.round(this.playbackOffset * 10) / 10
+      this.position = this.roundPosition(this.playbackOffset)
     }
     this.playState = "stopped"
   }
@@ -522,7 +527,7 @@ export class AudioEngine {
     this.recordingLatencySeconds = recordLatencySeconds
     this.punchInOffset = this.playbackOffset
 
-    this.position = Math.round(this.punchInOffset * 10) / 10
+    this.position = this.roundPosition(this.punchInOffset)
     this.playState = "recording"
 
     // Play other tracks for overdub monitoring, start meters and position timer
