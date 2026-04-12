@@ -1,6 +1,6 @@
 <script lang="ts">
   import { AudioEngine } from "$lib/audio/engine.svelte.js"
-  import type { HiddenTrackConfig, LoadStatus } from "$lib/types.js"
+  import type { HiddenTrackConfig, LoadStatus, ProjectMeta } from "$lib/types.js"
   import casetteHissUrl from "../assets/casette_hiss_compressed.mp3"
   import noiseImg from "../assets/noise_50.jpg"
   import logoImg from "../assets/logo.svg?url"
@@ -23,6 +23,7 @@
     initialProject,
     status = $bindable<LoadStatus>("idle"),
     loadProgress = $bindable(0),
+    meta = $bindable<ProjectMeta>({ artist: "", title: "", comment: "" }),
   }: {
     hiddenTracks?: HiddenTrackConfig[]
     onready?: (detail: { engine: AudioEngine }) => void
@@ -31,6 +32,7 @@
     initialProject?: string | File
     status?: LoadStatus
     loadProgress?: number
+    meta?: ProjectMeta
   } = $props()
 
   let engine: AudioEngine | null = $state(null)
@@ -38,6 +40,7 @@
   let speed = $state(0)
   let recordEngaged = $state(false)
   let resetTransport: (() => void) | undefined = $state()
+
 
   async function fetchWithProgress(url: string): Promise<File> {
     const response = await fetch(url)
@@ -76,7 +79,10 @@
     engine = new AudioEngine({ hiddenTracks })
     engine.initAudioContext()
 
-    save = () => engine!.exportProject()
+    save = () => {
+      engine!.meta = { ...meta }
+      return engine!.exportProject()
+    }
     load = async (source: File | string) => {
       status = "loading"
       loadProgress = 0
@@ -84,6 +90,7 @@
         const file =
           typeof source === "string" ? await fetchWithProgress(source) : source
         await engine!.importProject(file)
+        meta = { ...engine!.meta }
         resetTransport?.()
         status = "ready"
       } catch (e) {

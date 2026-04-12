@@ -2,7 +2,7 @@
 // and the transport state machine (play/pause/stop/record).
 // Delegates DSP, metering, and I/O to focused submodules.
 
-import type { AudioEngineConfig, MicStatus, PlayState, TrimFxConfig } from "../types.js"
+import type { AudioEngineConfig, MicStatus, PlayState, ProjectMeta, TrimFxConfig } from "../types.js"
 import { Track } from "./track.svelte.js"
 import {
   DEFAULT_CONFIG,
@@ -27,6 +27,7 @@ export class AudioEngine {
   latencyInfo = $state("")
   trimValue = $state(-1)
   recordingVolume = $state(0.75)
+  meta = $state<ProjectMeta>({ artist: "", title: "", comment: "" })
 
   tracks: Track[]
 
@@ -675,15 +676,16 @@ export class AudioEngine {
 
   /** Serializes all tracks and settings into a compressed .4trk binary blob. */
   exportProject(): Promise<Blob> {
-    return _exportProject(this.tracks, this.config, this.masterVolume)
+    return _exportProject(this.tracks, this.config, this.masterVolume, this.meta)
   }
 
   /** Loads a .4trk file, restoring all track buffers, mixer settings, and master volume. */
   async importProject(file: File | Blob): Promise<void> {
-    const { masterVolume } = await _importProject(file, this.tracks, () =>
+    const { masterVolume, meta } = await _importProject(file, this.tracks, () =>
       this.ensureContext(),
     )
     this.setMasterVolume(masterVolume)
+    this.meta = meta
     this.rewind()
   }
 

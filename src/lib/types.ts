@@ -38,6 +38,15 @@ export interface ProjectMetadata {
   bitDepth: number;
   masterVolume: number;
   tracks: TrackMeta[];
+  artist?: string;
+  title?: string;
+  comment?: string;
+}
+
+export interface ProjectMeta {
+  artist: string;
+  title: string;
+  comment: string;
 }
 
 export type PlayState = 'stopped' | 'playing' | 'paused' | 'recording';

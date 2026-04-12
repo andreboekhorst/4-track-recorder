@@ -3,13 +3,14 @@
 // Uses integer quantization from ./pcm.ts for compact storage.
 
 import { Track } from './track.svelte.js';
-import type { AudioEngineConfig, ProjectMetadata, TrackMeta } from '../types.js';
+import type { AudioEngineConfig, ProjectMeta, ProjectMetadata, TrackMeta } from '../types.js';
 import { quantizePCM, dequantizePCM } from './pcm.js';
 
 export async function exportProject(
   tracks: Track[],
   config: AudioEngineConfig,
   masterVolume: number,
+  meta: ProjectMeta = { artist: '', title: '', comment: '' },
 ): Promise<Blob> {
   const trackMeta: TrackMeta[] = [];
   const pcmParts: ArrayBuffer[] = [];
@@ -45,6 +46,9 @@ export async function exportProject(
     masterVolume,
     tracks: trackMeta,
   };
+  if (meta.artist) metadata.artist = meta.artist.slice(0, 64);
+  if (meta.title) metadata.title = meta.title.slice(0, 64);
+  if (meta.comment) metadata.comment = meta.comment.slice(0, 256);
 
   const encoder = new TextEncoder();
   const metaBytes = encoder.encode(JSON.stringify(metadata));
@@ -59,7 +63,7 @@ export async function importProject(
   file: File | Blob,
   tracks: Track[],
   ensureContext: () => AudioContext,
-): Promise<{ masterVolume: number }> {
+): Promise<{ masterVolume: number; meta: ProjectMeta }> {
   const decompressed = new Blob([file]).stream().pipeThrough(new DecompressionStream('gzip'));
   const arrayBuffer = await new Response(decompressed).arrayBuffer();
   const view = new DataView(arrayBuffer);
@@ -105,5 +109,12 @@ export async function importProject(
     if (track.panNode) track.panNode.pan.value = track.pan;
   }
 
-  return { masterVolume: metadata.masterVolume ?? 1.0 };
+  return {
+    masterVolume: metadata.masterVolume ?? 1.0,
+    meta: {
+      artist: metadata.artist ?? '',
+      title: metadata.title ?? '',
+      comment: metadata.comment ?? '',
+    },
+  };
 }
