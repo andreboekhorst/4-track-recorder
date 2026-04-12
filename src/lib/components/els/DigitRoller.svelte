@@ -22,7 +22,14 @@
     const digit = Math.floor(value)
     const fraction = value - digit
 
-    const eased = divisor == 1 ? fraction : sigmoidEase(fraction, divisor == 10 ? 12 : 50, divisor == 10 ? 0.98 : 0.9995)
+    const eased =
+      divisor == 1
+        ? fraction
+        : sigmoidEase(
+            fraction,
+            divisor == 10 ? 12 : 50,
+            divisor == 10 ? 0.98 : 0.9995,
+          )
     roller.style.transform = pos(digit + eased)
   })
 </script>
