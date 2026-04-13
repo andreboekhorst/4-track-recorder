@@ -1,9 +1,10 @@
 {
   "name": "4track",
-  "version": "0.1.12",
+  "version": "0.1.14",
   "description": "A 4-track cassette recorder component for Svelte 5",
   "license": "GPL-3.0-only",
   "author": "Andre Boekhorst",
+  "homepage": "https://www.4track.cc",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/andreboekhorst/4track.cc.git"
