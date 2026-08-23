@@ -7,7 +7,7 @@
   "homepage": "https://www.4track.cc",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/andreboekhorst/4track.cc.git"
+    "url": "git+https://github.com/andreboekhorst/4-track-recorder.git"
   },
   "keywords": [
     "svelte",

@@ -27,4 +27,4 @@ the Mac App Store), effective as of the date of this file's first commit.
 
 If you'd like to license 4track commercially (i.e. without GPL obligations)
 for your own product, contact Andre Boekhorst via the repository at
-https://github.com/andreboekhorst/4track.cc.
+https://github.com/andreboekhorst/4-track-recorder.
