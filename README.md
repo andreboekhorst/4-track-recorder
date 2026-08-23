@@ -84,3 +84,10 @@ Pass a URL or `File` to `initialProject` to auto-load a project when the compone
 | `save`           | `() => Blob` (bindable)                                | Bind to get a function that exports the project as a `.4trk` blob |
 | `load`           | `(source: File \| string) => Promise<void>` (bindable) | Bind to get a function that imports a `.4trk` file or URL         |
 | `initialProject` | `string \| File`                                       | URL or File to auto-load on mount                                 |
+
+## License
+
+4track is dual-licensed under [GPL-3.0-only](./LICENSE) or a
+[commercial license](./LICENSE-COMMERCIAL.md). Use it under the GPL for free,
+or reach out for a commercial license if you need to embed it in a
+closed-source product (e.g. an App Store app).
