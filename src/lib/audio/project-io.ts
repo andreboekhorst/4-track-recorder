@@ -5,6 +5,7 @@
 import { Track } from './track.svelte.js';
 import type { AudioEngineConfig, ProjectMeta, ProjectMetadata, TrackMeta } from '../types.js';
 import { quantizePCM, dequantizePCM } from './pcm.js';
+import { resampleBuffer } from './resample.js';
 
 export async function exportProject(
   tracks: Track[],
@@ -15,9 +16,16 @@ export async function exportProject(
   const trackMeta: TrackMeta[] = [];
   const pcmParts: ArrayBuffer[] = [];
 
+  // Storage rate: `config.sampleRate` when set, otherwise whatever rate the
+  // buffers already have (the live context's native rate).
+  const nativeRate = tracks.find((t) => t.buffer)?.buffer?.sampleRate ?? 48000;
+  const storageRate =
+    Number.isFinite(config.sampleRate) && config.sampleRate > 0 ? config.sampleRate : nativeRate;
+
   for (const track of tracks) {
     if (track.buffer) {
-      const float32 = track.buffer.getChannelData(0);
+      const buffer = await resampleBuffer(track.buffer, storageRate);
+      const float32 = buffer.getChannelData(0);
       const quantized = quantizePCM(float32, config.bitDepth);
       pcmParts.push(quantized);
       trackMeta.push({
@@ -41,7 +49,8 @@ export async function exportProject(
 
   const metadata: ProjectMetadata = {
     filetypeVersion: 1,
-    sampleRate: config.sampleRate,
+    // Tag the file with the rate the PCM data was actually written at.
+    sampleRate: storageRate,
     bitDepth: config.bitDepth,
     masterVolume,
     tracks: trackMeta,
@@ -92,9 +101,11 @@ export async function importProject(
       const pcmSlice = arrayBuffer.slice(offset, offset + byteLen);
       offset += byteLen;
       const float32 = dequantizePCM(pcmSlice, metadata.bitDepth);
-      const audioBuf = ctx.createBuffer(1, float32.length, metadata.sampleRate);
-      audioBuf.getChannelData(0).set(float32);
-      track.buffer = audioBuf;
+      const stored = ctx.createBuffer(1, float32.length, metadata.sampleRate);
+      stored.getChannelData(0).set(float32);
+      // Bring the track to the live context's rate so later punch-ins
+      // splice sample-accurately against the recorded audio.
+      track.buffer = await resampleBuffer(stored, ctx.sampleRate);
       track.hasContent = true;
     } else {
       track.buffer = null;

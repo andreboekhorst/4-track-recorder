@@ -6,7 +6,7 @@ import workletUrl from "../assets/recorder-worklet.js?url"
 export const PLAYBACK_TICK_MS = 32 // 30 fps
 
 export const DEFAULT_CONFIG: AudioEngineConfig = {
-  sampleRate: 32000, // 44100 | 48000 | 96000
+  sampleRate: 32000, // export/storage rate (32000 | 44100 | 48000); live graph runs at hardware rate
   bitDepth: 16, // 8 = lo-fi, 16 = CD quality, 32 = float (uncompressed)
   maxSeconds: 180, // max recording length per track (seconds)
   trackCount: 4, // number of mixer tracks
@@ -24,9 +24,18 @@ export const DEFAULT_CONFIG: AudioEngineConfig = {
   ],
 }
 
+// Instrument-friendly capture defaults. Echo cancellation would subtract the
+// monitored signal from the recording; noise suppression / AGC colour it.
+// No sampleRate constraint: forcing a non-native rate makes the browser
+// resample the live path in real time and adds monitoring latency.
 export const AUDIO_CONSTRAINTS: MediaTrackConstraints = {
   echoCancellation: false,
   noiseSuppression: false,
   autoGainControl: false,
   latency: { ideal: 0 },
 } as MediaTrackConstraints
+
+// Upper bound for the *computed* latency compensation. Advertised latency
+// values above this are treated as bogus. An explicit
+// `recordingLatencyOffset` override is not capped.
+export const MAX_COMPUTED_LATENCY_SECONDS = 0.5

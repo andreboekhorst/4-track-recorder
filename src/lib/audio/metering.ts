@@ -2,12 +2,25 @@
 
 import type { Track } from './track.svelte.js';
 
-export function updateMeterLevels(tracks: Track[], masterGain: number): void {
+export interface MeterOverride {
+  track: Track;
+  analyser: AnalyserNode;
+}
+
+// `override` lets one track be metered from a different analyser, e.g. the
+// input tap used while an external monitoring adapter mutes the built-in
+// pass-through (the track's own analyser would then read silence).
+export function updateMeterLevels(
+  tracks: Track[],
+  masterGain: number,
+  override?: MeterOverride,
+): void {
   const buf = new Float32Array(tracks[0]?.analyserNode?.fftSize ?? 256);
 
   for (const track of tracks) {
-    if (!track.analyserNode) continue;
-    track.analyserNode.getFloatTimeDomainData(buf);
+    const analyser = override && override.track === track ? override.analyser : track.analyserNode;
+    if (!analyser) continue;
+    analyser.getFloatTimeDomainData(buf);
 
     let peak = 0;
     for (let j = 0; j < buf.length; j++) {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { AudioEngine } from "$lib/audio/engine.svelte.js"
-  import type { HiddenTrackConfig, LoadStatus, ProjectMeta } from "$lib/types.js"
+  import type { AudioEngineConfig, HiddenTrackConfig, LoadStatus, ProjectMeta } from "$lib/types.js"
   import casetteHissUrl from "../assets/casette_hiss_compressed.mp3"
   import noiseImg from "../assets/noise_50.jpg"
   import logoImg from "../assets/logo.svg?url"
@@ -24,8 +24,11 @@
     status = $bindable<LoadStatus>("idle"),
     loadProgress = $bindable(0),
     meta = $bindable<ProjectMeta>({ artist: "", title: "", comment: "" }),
+    config,
   }: {
     hiddenTracks?: HiddenTrackConfig[]
+    /** Extra AudioEngine config (monitoringAdapter, captureStream, recordingLatencyOffset, ...). */
+    config?: Partial<AudioEngineConfig>
     onready?: (detail: { engine: AudioEngine }) => void
     save?: () => Promise<Blob>
     load?: (source: File | string) => Promise<void>
@@ -76,7 +79,7 @@
   }
 
   onMount(async () => {
-    engine = new AudioEngine({ hiddenTracks })
+    engine = new AudioEngine({ ...config, hiddenTracks })
     engine.initAudioContext()
 
     save = () => {

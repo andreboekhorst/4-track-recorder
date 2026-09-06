@@ -2,7 +2,13 @@
 // and the transport state machine (play/pause/stop/record).
 // Delegates DSP, metering, and I/O to focused submodules.
 
-import type { AudioEngineConfig, MicStatus, PlayState, ProjectMeta, TrimFxConfig } from "../types.js"
+import type {
+  AudioEngineConfig,
+  MicStatus,
+  MonitoringAdapter,
+  PlayState,
+  ProjectMeta,
+} from "../types.js"
 import { Track } from "./track.svelte.js"
 import {
   DEFAULT_CONFIG,
@@ -10,7 +16,11 @@ import {
   PLAYBACK_TICK_MS,
 } from "./constants.js"
 import { buildInputFxChain, applyTrim } from "./input-fx.js"
-import { measureRecordLatency, mergeRecordingIntoBuffer } from "./recording.js"
+import {
+  measureRecordLatency,
+  mergeRecordingIntoBuffer,
+  resolveRecordingLatency,
+} from "./recording.js"
 import { updateMeterLevels } from "./metering.js"
 import {
   exportProject as _exportProject,
@@ -28,6 +38,20 @@ export class AudioEngine {
   trimValue = $state(-1)
   recordingVolume = $state(0.75)
   meta = $state<ProjectMeta>({ artist: "", title: "", comment: "" })
+
+  /**
+   * Recording latency compensation override in seconds. When set, replaces
+   * the value computed from the AudioContext/mic latency properties. Read
+   * when a take is finalized, so it can be calibrated at any point before
+   * `stop()`. `undefined` = use the computed default.
+   */
+  recordingLatencyOffset: number | undefined
+
+  /**
+   * Replaces the built-in mic-to-speakers pass-through. Takes effect the
+   * next time monitoring starts. `undefined` = built-in Web Audio monitoring.
+   */
+  monitoringAdapter: MonitoringAdapter | undefined
 
   tracks: Track[]
 
@@ -60,6 +84,17 @@ export class AudioEngine {
   private punchInOffset = 0
   private timerId: number | null = null
 
+  // Capture
+  private warmStream: MediaStream | null = null
+
+  // Monitoring adapter (external pass-through). When active, the worklet's
+  // output goes to a muted tap instead of the track so capture and metering
+  // keep working while the built-in monitoring path is silent.
+  private activeMonitoringAdapter: MonitoringAdapter | null = null
+  private monitorTapNode: GainNode | null = null
+  private monitorAnalyserNode: AnalyserNode | null = null
+  private monitoringTrackIndex = -1
+
   // Input FX chain (created per recording, torn down on stop)
   private inputGainNode: GainNode | null = null
   private trimGainNode: GainNode | null = null
@@ -78,6 +113,8 @@ export class AudioEngine {
   constructor(config: Partial<AudioEngineConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config }
     if (config.inputFx) this.config.inputFx = config.inputFx
+    this.recordingLatencyOffset = this.config.recordingLatencyOffset
+    this.monitoringAdapter = this.config.monitoringAdapter
 
     const trimCfg = this.config.inputFx.find((fx) => fx.type === "trim")
     if (trimCfg) this.trimValue = trimCfg.default
@@ -97,13 +134,13 @@ export class AudioEngine {
 
   // ─── Context / Channel Strips ───────────────────────────────────────
 
-  /** Lazily creates the AudioContext and wires up channel strips. Requires a user gesture. */
+  /** Lazily creates the AudioContext and wires up channel strips. Requires a user gesture.
+   *  The context runs at the hardware's native sample rate: forcing another
+   *  rate makes the browser resample the live path and adds monitoring latency.
+   *  `config.sampleRate` only governs the export/storage rate. */
   private ensureContext(): AudioContext {
     if (!this.audioContext) {
-      this.audioContext = new AudioContext({
-        latencyHint: "interactive",
-        sampleRate: this.config.sampleRate,
-      })
+      this.audioContext = new AudioContext({ latencyHint: "interactive" })
     }
     this.ensureChannelStrips()
     return this.audioContext
@@ -137,6 +174,11 @@ export class AudioEngine {
     }
 
     this.startMeters()
+  }
+
+  /** The sample rate the live graph runs at, or `null` before the context exists. */
+  get liveSampleRate(): number | null {
+    return this.audioContext?.sampleRate ?? null
   }
 
   // ─── Audio Context Initialization ─────────────────────────────────
@@ -391,10 +433,47 @@ export class AudioEngine {
     }
   }
 
+  // ─── Capture ────────────────────────────────────────────────────────
+
+  /** Effective `getUserMedia` audio constraints: engine defaults + consumer overrides. */
+  private captureConstraints(): MediaTrackConstraints {
+    return { ...AUDIO_CONSTRAINTS, ...(this.config.audioConstraints ?? {}) }
+  }
+
+  /** Acquires the mic stream for a take, honoring `captureStream` and `persistentCapture`.
+   *  Contains the only `getUserMedia` call in the engine. */
+  private async acquireStream(): Promise<MediaStream> {
+    const constraints = this.captureConstraints()
+
+    if (this.config.captureStream) {
+      return await this.config.captureStream(constraints)
+    }
+
+    if (this.config.persistentCapture) {
+      if (this.warmStream && this.warmStream.getAudioTracks().some((t) => t.readyState === "live")) {
+        return this.warmStream.clone()
+      }
+      this.warmStream = await navigator.mediaDevices.getUserMedia({ audio: constraints })
+      return this.warmStream.clone()
+    }
+
+    return await navigator.mediaDevices.getUserMedia({ audio: constraints })
+  }
+
+  /** Releases a persistently held mic stream (see `persistentCapture`). */
+  releaseCapture(): void {
+    if (!this.warmStream) return
+    this.warmStream.getTracks().forEach((t) => t.stop())
+    this.warmStream = null
+    if (this.micStatus === "active" && !this.recorderSourceNode) this.micStatus = "inactive"
+  }
+
   // ─── Monitoring ─────────────────────────────────────────────────────
 
   /** Sets up mic input chain for live monitoring (pass-through to speakers).
-   *  Can be called independently of recording (e.g. record armed + paused). */
+   *  Can be called independently of recording (e.g. record armed + paused).
+   *  With a `monitoringAdapter`, the adapter provides the pass-through and
+   *  the built-in path is muted; capture and meters are unaffected. */
   async startMonitoring(trackIndex: number): Promise<void> {
     // Already monitoring — nothing to do
     if (this.recorderSourceNode) return
@@ -402,7 +481,7 @@ export class AudioEngine {
     if (trackIndex < -1 || trackIndex >= this.tracks.length) return
     if (trackIndex >= 0 && this.tracks[trackIndex].hidden) return
 
-    if (!navigator.mediaDevices?.getUserMedia) {
+    if (!this.config.captureStream && !navigator.mediaDevices?.getUserMedia) {
       this.micStatus = "unsupported"
       throw new Error("Recording requires a secure context (HTTPS). Please access this app over HTTPS.")
     }
@@ -411,12 +490,7 @@ export class AudioEngine {
     // user-gesture window that iOS Safari enforces for getUserMedia.
     let stream: MediaStream
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          ...AUDIO_CONSTRAINTS,
-          sampleRate: { ideal: this.config.sampleRate },
-        },
-      })
+      stream = await this.acquireStream()
     } catch (err) {
       if (err instanceof DOMException) {
         if (err.name === "NotAllowedError") this.micStatus = "denied"
@@ -463,7 +537,19 @@ export class AudioEngine {
     }
     prev.connect(this.recVolNode)
     this.recVolNode.connect(worklet)
-    if (trackIndex >= 0) {
+
+    const adapter = this.monitoringAdapter ?? null
+    if (adapter) {
+      // External monitoring: keep the worklet pulled (so PCM capture keeps
+      // flowing) and metered, but silent on the built-in path.
+      this.monitorAnalyserNode = ctx.createAnalyser()
+      this.monitorAnalyserNode.fftSize = 256
+      this.monitorTapNode = ctx.createGain()
+      this.monitorTapNode.gain.value = 0
+      worklet.connect(this.monitorAnalyserNode)
+      this.monitorAnalyserNode.connect(this.monitorTapNode)
+      this.monitorTapNode.connect(ctx.destination)
+    } else if (trackIndex >= 0) {
       const track = this.tracks[trackIndex]
       worklet.connect(track.gainNode!)
     } else {
@@ -472,10 +558,40 @@ export class AudioEngine {
 
     this.recorderSourceNode = source
     this.recorderWorkletNode = worklet
+    this.monitoringTrackIndex = trackIndex
+
+    if (adapter) {
+      this.activeMonitoringAdapter = adapter
+      try {
+        await adapter.start({ stream, trackIndex, context: ctx })
+      } catch (err) {
+        this.stopMonitoring()
+        throw err
+      }
+    }
   }
 
   /** Tears down the mic input chain and releases the microphone. */
   stopMonitoring(): void {
+    // Hand the pass-through back from the adapter first
+    const adapter = this.activeMonitoringAdapter
+    this.activeMonitoringAdapter = null
+    if (adapter) {
+      try {
+        const r = adapter.stop()
+        if (r && typeof (r as Promise<void>).catch === "function") {
+          ;(r as Promise<void>).catch((e) => console.warn("monitoringAdapter.stop failed:", e))
+        }
+      } catch (e) {
+        console.warn("monitoringAdapter.stop failed:", e)
+      }
+    }
+    this.monitorAnalyserNode?.disconnect()
+    this.monitorTapNode?.disconnect()
+    this.monitorAnalyserNode = null
+    this.monitorTapNode = null
+    this.monitoringTrackIndex = -1
+
     // Disconnect input processing chain
     this.inputGainNode?.disconnect()
     for (const node of this.inputFxNodes) node.disconnect()
@@ -494,6 +610,7 @@ export class AudioEngine {
     if (source) source.disconnect()
     if (worklet) worklet.port.onmessage = null
     worklet?.disconnect()
+    // Stopping a clone leaves a persistent warm stream running.
     if (source?.mediaStream)
       source.mediaStream.getTracks().forEach((t) => t.stop())
 
@@ -512,9 +629,11 @@ export class AudioEngine {
     const ctx = this.ensureContext()
     const stream = this.recorderSourceNode!.mediaStream
 
-    // Measure round-trip latency for alignment when merging
-    const recordLatencySeconds = measureRecordLatency(stream, ctx)
-    this.updateLatencyDisplay(recordLatencySeconds)
+    // Estimate round-trip latency at record start for compensation when merging.
+    // An explicit `recordingLatencyOffset` override is applied at finalize time.
+    const latency = measureRecordLatency(stream, ctx)
+    const recordLatencySeconds = latency.total
+    this.updateLatencyDisplay(latency.total, latency.base, latency.output, latency.input)
 
     // Start collecting PCM chunks from the worklet
     this.recordedChunks = []
@@ -569,13 +688,15 @@ export class AudioEngine {
     this.stopAllPlayback()
     this.clearTimer()
 
-    // Merge recorded audio into the track buffer with latency compensation
-    const trimSamples = Math.max(
-      0,
-      Math.round(
-        (ctx?.sampleRate ?? this.config.sampleRate) * recordLatencySeconds,
-      ),
+    // Merge recorded audio into the track buffer with latency compensation:
+    // shift the take earlier by dropping `offset` seconds from its front.
+    // An explicit override beats the computed default; nonsense clamps to 0
+    // and trimAndConcat never drops more than the take contains.
+    const compensationSeconds = resolveRecordingLatency(
+      recordLatencySeconds,
+      this.recordingLatencyOffset,
     )
+    const trimSamples = ctx ? Math.round(ctx.sampleRate * compensationSeconds) : 0
 
     if (selectedTrackIndex >= 0 && this.recordedChunks.length && ctx) {
       const track = this.tracks[selectedTrackIndex]
@@ -595,10 +716,14 @@ export class AudioEngine {
         track.hasContent = true
       }
 
+      // A fresh track's timeline origin is the buffer's first sample; the
+      // latency shift is already applied by trimming, so trimStart stays 0.
+      // (Setting it to the latency as well would compensate twice.)
       if (!hadExistingBuffer) {
-        track.trimStart = recordLatencySeconds
+        track.trimStart = 0
       }
-      this.latencyInfo = `Latency: ~${Math.round(recordLatencySeconds * 1000)} ms (compensated)`
+      const source = this.recordingLatencyOffset !== undefined ? "override" : "computed"
+      this.latencyInfo = `Latency: ~${Math.round(compensationSeconds * 1000)} ms (compensated, ${source})`
     }
 
     this.recordedChunks = []
@@ -606,16 +731,18 @@ export class AudioEngine {
   }
 
   /** Updates the latencyInfo reactive state with a human-readable breakdown. */
-  private updateLatencyDisplay(recordLatencySeconds: number): void {
-    const ctx = this.audioContext
-    const baseMs =
-      ctx && typeof ctx.baseLatency === "number" ? ctx.baseLatency * 1000 : 0
-    const outMs =
-      ctx && typeof (ctx as any).outputLatency === "number"
-        ? (ctx as any).outputLatency * 1000
-        : 0
-    const totalMs = Math.round(recordLatencySeconds * 1000)
-    this.latencyInfo = `Target <20ms \u2022 Round-trip ~${totalMs} ms (base ${Math.round(baseMs)} ms, out ${Math.round(outMs)} ms)`
+  private updateLatencyDisplay(
+    totalSeconds: number,
+    baseSeconds: number,
+    outputSeconds: number,
+    inputSeconds: number,
+  ): void {
+    const ms = (v: number) => Math.round(v * 1000)
+    const override =
+      this.recordingLatencyOffset !== undefined
+        ? ` \u2022 override ${ms(this.recordingLatencyOffset)} ms`
+        : ""
+    this.latencyInfo = `Target <20ms \u2022 Round-trip ~${ms(totalSeconds)} ms (base ${ms(baseSeconds)} ms, out ${ms(outputSeconds)} ms, in ${ms(inputSeconds)} ms)${override}`
   }
 
   // ─── Mixer Controls ─────────────────────────────────────────────────
@@ -659,7 +786,12 @@ export class AudioEngine {
   private startMeters(): void {
     if (this.meterRafId !== null) return
     const tick = () => {
-      updateMeterLevels(this.tracks, this.masterGainNode?.gain.value ?? 1)
+      const master = this.masterGainNode?.gain.value ?? 1
+      const monitored =
+        this.monitorAnalyserNode && this.monitoringTrackIndex >= 0
+          ? { track: this.tracks[this.monitoringTrackIndex], analyser: this.monitorAnalyserNode }
+          : undefined
+      updateMeterLevels(this.tracks, master, monitored)
       this.meterRafId = requestAnimationFrame(tick)
     }
     this.meterRafId = requestAnimationFrame(tick)
@@ -697,6 +829,7 @@ export class AudioEngine {
     this.clearTimer()
     this.stopMeters()
     this.stopMonitoring()
+    this.releaseCapture()
 
     for (const track of this.tracks) {
       track.gainNode?.disconnect()
